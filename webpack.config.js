@@ -12,7 +12,7 @@ let config = module.exports = {
   },
   mode: 'production',
   devServer: {
-    contentBase: './dist',
+    contentBase: './demo',
   },
   module: {
     rules: [{

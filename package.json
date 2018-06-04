@@ -10,8 +10,13 @@
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-2": "^6.24.1",
+    "rollup": "^0.59.4",
     "unminified-webpack-plugin": "^2.0.0",
     "webpack": "^4.10.2",
-    "webpack-cli": "^3.0.1"
+    "webpack-cli": "^3.0.1",
+    "webpack-dev-server": "^3.1.4"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --config ./webpack.config.js --mode development"
   }
 }
