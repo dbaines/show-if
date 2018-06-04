@@ -1,0 +1,17 @@
+{
+  "name": "show-if",
+  "version": "0.1.0",
+  "description": "Show/hide elements based on form selections",
+  "main": "show-if.js",
+  "author": "David Baines <david@katalyst.com.au>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "unminified-webpack-plugin": "^2.0.0",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^3.0.1"
+  }
+}

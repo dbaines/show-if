@@ -1,0 +1,49 @@
+
+{
+  "env": {
+    "browser": true,
+    "jquery": true,
+    "node": true
+  },
+  "globals": {
+    "_": true
+  },
+  "installedESLint": true,
+  "parserOptions": {
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "jsx": true
+    }
+  },
+  "plugins": [
+    "react"
+  ],
+  "rules": {
+    "indent": ["error", 2],
+    "eqeqeq": ["error"],
+    "array-bracket-spacing": ["error", "never"],
+    "block-spacing": ["error", "never"],
+    "brace-style": ["error", "1tbs"],
+    "camelcase": ["error"],
+    "comma-dangle": ["error", "never"],
+    "eol-last": "error",
+    "curly": ["error", "all"],
+    "no-cond-assign": ["error", "always"],
+    "quotes": ["error","double"],
+    "semi": ["error","always"],
+    "no-extra-semi": ["error"],
+    "no-dupe-keys": ["error"],
+    "no-debugger": ["error"],
+    "no-duplicate-case": ["error"],
+    "default-case": ["error"],
+    "no-lonely-if": "error",
+    "linebreak-style": ["error","unix"],
+    "use-isnan": ["error"],
+    "no-invalid-regexp": ["error"],
+    "strict": ["error", "global"],
+    "no-redeclare": ["error", { "builtinGlobals": true }],
+    "no-fallthrough": ["error"],
+    "no-undef": ["error"],
+    "no-unused-vars": ["error"]
+  }
+}
