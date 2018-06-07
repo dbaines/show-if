@@ -12,13 +12,14 @@ let config = module.exports = {
   },
   mode: 'production',
   devServer: {
-    contentBase: './demo',
+    contentBase: './dist',
   },
   module: {
     rules: [{
       test: /\.js$/,
-      exclude: /(node_modules|bower_components)/,
-      loader: 'babel-loader',
+      use: [{
+        loader: 'babel-loader'
+      }]
     }]
   },
   plugins: [

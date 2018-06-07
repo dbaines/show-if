@@ -3,3 +3,11 @@
 * Documentation
 * Changelog
 * Contributing
+
+## Development
+
+```
+git clone ...
+yarn
+yarn start
+```
