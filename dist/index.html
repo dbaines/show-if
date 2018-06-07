@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <title>ShowIf tests</title>
+    <link rel="stylesheet" href="./demo.css" />
+  </head>
+  <body>
+
+    <div class="container">
+      <h1>ShowIf.js</h1>
+
+      <div class="content">
+        <p><code>show-if</code> is used to show or hide elements based on form selections by marking up your forms with simple <code>data-attributes</code>.</p>
+      </div>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="basic" />
+          <label for="basic">Tick to show element.</label>
+        </div>
+        <div class="control-group" data-show-if="basic">
+          This is some hidden content that appears when the checkbox is clicked.
+        </div>
+      </div>
+    
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Show Types</h2>
+      <h3>Checkbox</h3>
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>Which topic are you interested in?</div>
+            <div class="controls">
+              <div>
+                <input type="checkbox" id="example-2-a" />
+                <label for="example-2-a">Comedy<label>
+              </div>
+              <div>
+                <input type="checkbox" id="example-2-b" />
+                <label for="example-2-b">Drama<label>
+              </div>
+              <div>
+                <input type="checkbox" id="example-2-c" />
+                <label for="example-2-c">Other<label>
+              </div>
+              <div data-show-if="example-2-c">
+                <label for="example-2-hidden">Please specify</label>
+                <input type="text" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Radios</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>What do you want to show?</div>
+            <div class="controls">
+              <div>
+                <input name="radios" type="radio" id="radios-a" />
+                <label for="radios-a">Nothing<label>
+              </div>
+              <div>
+                <input name="radios" type="radio" id="radios-b" />
+                <label for="radios-b">Not anything<label>
+              </div>
+              <div>
+                <input name="radios" type="radio" id="radios-c" />
+                <label for="radios-c">A hidden field<label>
+              </div>
+              <div data-show-if="radios-c">
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Select</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>What do you want to show?</div>
+            <div class="controls">
+              <select id="select" id="select">
+                <option value="">Nothing</option>
+                <option value="">Not anything</option>
+                <option value="hidden">A hidden field</option>
+              </select>
+              <div data-show-if="select" data-show-option="hidden">
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Text</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <label class="control-label" for="input">Type 'showme'</label>
+            <div class="controls">
+              <input type="text" id="input" />
+            </div>
+          </div>
+          <div class="control-group" data-show-if="input" data-show-input="showme">
+            <div class="controls">
+              <input type="text" placeholder="Oh hello" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Inverting matches</h2>
+      <p>Sometimes you want the opposite behaviour, to show the field by default then hide it if a requirement is met.</p>
+      <p>This can be accomplished by adding the <code>data-show-invert</code> attribute to your element.</p>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Multiple matches (AND)</h2>
+      <h3>Multiple checkboxes</h3>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Multiple matches (OR)</h2>
+      <h3>Multiple checkboxes</h3>
+      <h3>Multiple select</h3>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>String match types</h2>
+      <h3>Fuzzy match</h3>
+      <p>Match if the required string is anywhere in the input value by adding <code>data-show-type='any'</code>.</p>
+      <h3>Type anything</h3>
+      <p>Match if the field has any value at all with <code>data-show-type='*'</code>.</p>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Data destruction</h2>
+      <p>A common problem with dynamic forms like these is that hidden fields probably shouldn't send their data to the form endpoint.</p>
+      <p>There are two out-of-the-box solutions for this problem.</p>
+      <h3>Empty values</h3>
+      <p>All fields that are hidden can have all their values removed with <code>data-show-destroy</code>.</p>
+      <h3>Disabling fields</h3>
+      <p>A less destructive option is to disable hidden fields instead. This can be done with <code>data-show-disable</code>.</p>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Configuration</h2>
+
+      <p>All default configuration can be customised on your page by exposing a window variable <code>window.showIfSettings</code>:</p>
+
+      <pre>window.showIfSettings = {
+  showIf: 'data-show',
+  helpers: false,
+}</pre>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>Helpers</h2>
+
+      <p>You can expose helpers to a window variable, <code>showIf</code> by settings <code>helpers: true</code> in <a href="#config">your configuration</a>.</p>
+
+      <p>This allows you to essentially roll your own logic using the decern, toggle, show and hide functions that this library uses.</p>
+
+      <pre>var myCheckbox = document.querySelector("#my-input");
+myCheckbox.addEventListener("change", animateContent);
+var animateContent = function(){
+  if(showIf.decernCheckbox(myCheckbox)) {
+    animateIn();
+  } else {
+    animateOut();
+  }
+}</pre>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <h2>JQuery support</h2>
+      <p>Out of the box we can detect for jQuery and if it's present we can change the show/hide functions to slideDown/slideUp instead for a nicer out-of-the-box experience.</p>
+      <p><button onclick="jQueryify()">Click here</button> to load in jQuery. Then go back over the examples above to see the slide variation.</p>
+    </div>
+
+    <script src="./show-if.js"></script>
+    <script>
+      // jquerify.js
+      // https://github.com/bgrins/devtools-snippets
+      window.jQueryify = function(){
+        if ( !window.jQuery ) {
+          var s = document.createElement('script');
+          s.setAttribute('src', '//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js');
+          s.addEventListener('load', function(){
+            alert("jQuery loaded.");
+          });
+          document.body.appendChild(s);
+        }
+      }
+    </script>
+  </body>
+</html>
