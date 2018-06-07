@@ -8,13 +8,8 @@
 */
 
 /*global jQuery */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define(factory);
-  } else {
-    root.showIf = factory(root);
-  }
-}(this, function () {
+(function() {
+  "use strict";
 
   let showIf = {
     version: "0.1.0",
@@ -231,6 +226,7 @@
 
   // Get the controls for a show rule, eg:
   // [data-show-if='foobar'] => #foobar
+  // [data-show-if='foo_&_bar'] => #foo,#bar
   showIf._getTargetControlsFor = function($target) {
     let $controls = [];
     const showRules = showIf._getShowRuleForElement($target);
@@ -261,7 +257,7 @@
     const inputName = _getAttribute($input, "name");
     let $siblingTargets = [];
     if(inputName) {
-      $siblingTargets = document.querySelectorAll("[name='" + inputName + "]");
+      $siblingTargets = document.querySelectorAll("[name='" + inputName + "']");
     }
 
     const changeFunction = function(event, instant=false) {
@@ -276,9 +272,9 @@
 
     // Check on change events
     if($siblingTargets.length) {
-      $siblingTargets.map($ibling => {
+      for(const $sibling of $siblingTargets) {
         $sibling.addEventListener("change", changeFunction);
-      });
+      }
     } else {
       $input.addEventListener("change", changeFunction);
     }
@@ -414,7 +410,7 @@
   }
 
   showIf.decernMultipleRadio = function($target, $inputs, instant=false, callback=false) {
-    const shouldShow = showIf._decernMultipleFields(target, $inputs, selectOption);
+    const shouldShow = showIf._decernMultipleFields($target, $inputs);
     if(callback) {
       callback($target, shouldShow, instant);
     } else {
@@ -465,7 +461,7 @@
         showIf.setRequired($target, true);
       } else {
         const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
-        for($input of $inputs) {
+        for(const $input of $inputs) {
           showIf.setRequired($target, true);
         }
       }
@@ -494,7 +490,7 @@
         showIf.setRequired($target, false);
       } else {
         const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
-        for($input of $inputs) {
+        for(const $input of $inputs) {
           showIf.setRequired($target, false);
         }
       }
@@ -595,9 +591,10 @@
   }
 
   // Initialise if running in the browser
-  if(this === window) {
+  if(typeof(window) !== "undefined") {
     showIf.init();
   }
 
   return showIf;
-}));
+
+}());
