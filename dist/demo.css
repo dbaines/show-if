@@ -1,16 +1,13 @@
 html {
   background: #f8f8f8;
+  font-size: 16px;
 }
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 16px;
 }
 label {
   display: inline-block;
-}
-input[type=text] {
-  padding: 4px;
 }
 pre {
   background: #fff;
@@ -22,6 +19,27 @@ hr {
   border: 0;
   height: 1px;
   background: #ccc;
+}
+input[type=text],
+select {
+  font-size: inherit;
+  font-family: inherit;
+  padding: .75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: .2s border-color;
+  background: #fff;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, .1);
+}
+input[type=text] {
+  padding: .75rem .5rem;
+}
+select {
+  height: 2.5rem;
+}
+input[type=text]:focus,
+select:focus {
+  border-color: #666;
 }
 [required] {
   outline: 2px solid purple;
@@ -40,5 +58,19 @@ hr {
   margin-top: 16px;
 }
 .controls {
-  margin-top: 4px;
+  margin-top: 16px;
+}
+.controls:first-child {
+  margin-top: 0;
+}
+.button {
+  -webkit-appearance: none;
+  font-family: inherit;
+  font-size: inherit;
+  border: 0;
+  background: #bada55;
+  color: #222;
+  border-radius: 6px;
+  padding: .5rem 1rem;
+  cursor: pointer;
 }

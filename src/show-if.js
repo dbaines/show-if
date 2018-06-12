@@ -59,6 +59,9 @@
     // Inverse logic
     inverse: "data-show-inverse",
 
+    // Focus on inputs in the hidden element
+    focusIn: "data-show-focus",
+
     // Disable hidden form fields when hiding
     disable: "data-show-disable",
 
@@ -187,18 +190,20 @@
   // Find an element and make all input fields within disabled
   showIf._disableFieldsIn = function($element) {
     if($element.hasAttribute(showIf.settings.disable)) {
-      $element.querySelectorAll(showIf.settings.inputTypes).map($input => {
+      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
         $input.disabled = true;
-      })
+      }
     }
   }
 
   // Find an element and make all input fields within enabled
   showIf._enableFieldsIn = function($element) {
     if($element.hasAttribute(showIf.settings.disable)) {
-      $element.querySelectorAll(showIf.settings.inputTypes).map($input => {
+      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
         $input.disabled = false;
-      })
+      }
     }
   }
 
@@ -206,13 +211,14 @@
   // said element
   showIf._destroyDataIn = function($element) {
     if($element.hasAttribute(showIf.settings.destroy)) {
-      $element.querySelectorAll(showIf.settings.inputTypes).map($input => {
+      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
         if(showIf._isInputCheckable($input)) {
           $input.checked = false;
         } else {
           $input.value = "";
         }
-      });
+      }
     }
   }
 
@@ -352,14 +358,14 @@
       if(useProp) {
         if($input.checked === valueToCheck) {
           numberOfTargetsHit++;
-        } else if($input.val() === valueToCheck) {
+        } else if($input.value === valueToCheck) {
           numberOfTargetsHit++;
         }
       }
     });
 
     // Match any or all?
-    if(_getAttribute($element, showIf.settings.showType) === "any") {
+    if(_getAttribute($target, showIf.settings.showType) === "any") {
       // If match any, check that there's at least one hit
       shouldShow = numberOfTargetsHit > 0;
     } else {
@@ -478,6 +484,23 @@
         }
       }
     }
+
+    // Focus
+    if($target.hasAttribute(showIf.settings.focusIn)) {
+      const focusTarget = _getAttribute($target, showIf.settings.focusIn) || showIf.settings.inputTypes;
+      const $inputs = $target.querySelectorAll(focusTarget);
+      for(const $input of $inputs) {
+        if($input.offsetWidth > 0 && $input.offsetHeight > 0) {
+          $input.focus();
+        }
+      }
+    }
+
+    // Re-enable
+    if($target.hasAttribute(showIf.settings.disable)) {
+      showIf._enableFieldsIn($target);
+    }
+
     showIf._afterShow($target);
   }
 
@@ -507,6 +530,17 @@
         }
       }
     }
+
+    // Disable
+    if($target.hasAttribute(showIf.settings.disable)) {
+      showIf._disableFieldsIn($target);
+    }
+
+    // Destroy
+    if($target.hasAttribute(showIf.settings.destroy)) {
+      showIf._destroyDataIn($target);
+    }
+
     showIf._afterHide($target);
   }
 
@@ -543,7 +577,7 @@
   }
 
   showIf.toggle = function($target, shouldShow=false, instant=false) {
-    if(_getAttribute($target, showIf.settings.inverse)) {
+    if($target.hasAttribute(showIf.settings.inverse)) {
       shouldShow = !shouldShow;
     }
     if(shouldShow) {

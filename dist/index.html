@@ -29,7 +29,9 @@
 
     <div class="container">
       <h2>Show Types</h2>
+
       <h3>Checkbox</h3>
+
       <div class="spacing">
         <div class="inputs">
           <div class="control-group">
@@ -129,21 +131,182 @@
       <h2>Inverting matches</h2>
       <p>Sometimes you want the opposite behaviour, to show the field by default then hide it if a requirement is met.</p>
       <p>This can be accomplished by adding the <code>data-show-invert</code> attribute to your element.</p>
+
+      <h3>Checkbox</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>Which topic are you interested in?</div>
+            <div class="controls">
+              <div>
+                <input type="checkbox" id="inverse-checkbox-a" />
+                <label for="inverse-checkbox-a">Comedy<label>
+              </div>
+              <div>
+                <input type="checkbox" id="inverse-checkbox-b" />
+                <label for="inverse-checkbox-b">Drama<label>
+              </div>
+              <div>
+                <input type="checkbox" id="inverse-checkbox-c" />
+                <label for="inverse-checkbox-c">Other<label>
+              </div>
+              <div data-show-if="inverse-checkbox-c" data-show-inverse>
+                <label for="example-2-hidden">Please specify</label>
+                <input type="text" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Radios</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>What do you want to show?</div>
+            <div class="controls">
+              <div>
+                <input name="radios" type="radio" id="inverse-radios-a" />
+                <label for="inverse-radios-a">Nothing<label>
+              </div>
+              <div>
+                <input name="radios" type="radio" id="inverse-radios-b" />
+                <label for="inverse-radios-b">Not anything<label>
+              </div>
+              <div>
+                <input name="radios" type="radio" id="inverse-radios-c" />
+                <label for="inverse-radios-c">A hidden field<label>
+              </div>
+              <div data-show-if="inverse-radios-c" data-show-inverse>
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Select</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>What do you want to show?</div>
+            <div class="controls">
+              <select id="inverse-select">
+                <option value="">Nothing</option>
+                <option value="">Not anything</option>
+                <option value="hidden">A hidden field</option>
+              </select>
+              <div data-show-if="inverse-select" data-show-option="hidden" data-show-inverse>
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Text</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <label class="control-label" for="inverse-input">Type 'showme'</label>
+            <div class="controls">
+              <input type="text" id="inverse-input" />
+            </div>
+          </div>
+          <div class="control-group" data-show-if="inverse-input" data-show-input="showme" data-show-inverse>
+            <div class="controls">
+              <input type="text" placeholder="Oh hello" />
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <hr />
 
     <div class="container">
+
       <h2>Multiple matches (AND)</h2>
+
       <h3>Multiple checkboxes</h3>
+
+      <p>Simply seperate your IDs with a <code>_&_</code>, eg: <code>multi-and-raph_&_multi-and-don</code>.</p>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>Select Donatello and Raphael</div>
+            <div class="controls">
+              <div>
+                <input type="checkbox" id="multi-and-leo" />
+                <label for="multi-and-leo">Leonardo<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-and-don" />
+                <label for="multi-and-don">Donatello<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-and-raph" />
+                <label for="multi-and-raph">Raphael<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-and-mike" />
+                <label for="multi-and-mike">Michaelangelo<label>
+              </div>
+              <div data-show-if="multi-and-raph_&_multi-and-don">
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <hr />
 
     <div class="container">
+
       <h2>Multiple matches (OR)</h2>
+
       <h3>Multiple checkboxes</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>Select Donatello or Raphael</div>
+            <div class="controls">
+              <div>
+                <input type="checkbox" id="multi-or-leo" />
+                <label for="multi-or-leo">Leonardo<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-or-don" />
+                <label for="multi-or-don">Donatello<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-or-raph" />
+                <label for="multi-or-raph">Raphael<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-or-mike" />
+                <label for="multi-or-mike">Michaelangelo<label>
+              </div>
+              <div data-show-if="multi-or-raph_&_multi-or-don" data-show-type="any">
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <h3>Multiple select</h3>
+
     </div>
 
     <hr />
@@ -159,13 +322,77 @@
     <hr />
 
     <div class="container">
+      <h2>Focus</h2>
+
+      <p>Focus on the first input inside the hidden element with <code>data-show-focus</code>:</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="focus-basic" />
+          <label for="focus-basic">Tick to show element.</label>
+        </div>
+        <div class="control-group" data-show-if="focus-basic" data-show-focus>
+          <div class="controls">
+            <input type="text" placeholder="Oh hello" />
+          </div>
+        </div>
+      </div>
+
+      <p>Alternatively, you can choose the selector for the focus functionality by passing a value in to the <code>data-show-focus</code> attribute:</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="focus-custom" />
+          <label for="focus-custom">Tick to show element.</label>
+        </div>
+        <div class="control-group" data-show-if="focus-custom" data-show-focus="[data-show-focus-target]">
+          <div class="controls">
+            <input type="text" placeholder="Skipped!" />
+            <input type="text" placeholder="Focused!" data-show-focus-target />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="container">
+
       <h2>Data destruction</h2>
+
       <p>A common problem with dynamic forms like these is that hidden fields probably shouldn't send their data to the form endpoint.</p>
       <p>There are two out-of-the-box solutions for this problem.</p>
+      
       <h3>Empty values</h3>
       <p>All fields that are hidden can have all their values removed with <code>data-show-destroy</code>.</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="destroy-empty" />
+          <label for="destroy-empty">Tick to show element.</label>
+        </div>
+        <div class="control-group" data-show-if="destroy-empty" data-show-destroy>
+          <div class="controls">
+            <input type="text" placeholder="Oh hello" />
+          </div>
+        </div>
+      </div>
+
       <h3>Disabling fields</h3>
       <p>A less destructive option is to disable hidden fields instead. This can be done with <code>data-show-disable</code>.</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="destroy-disable" />
+          <label for="destroy-disable">Tick to show element.</label>
+        </div>
+        <div class="control-group" data-show-if="destroy-disable" data-show-disable>
+          <div class="controls">
+            <input type="text" placeholder="Oh hello" />
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <hr />
@@ -206,10 +433,10 @@ var animateContent = function(){
     <div class="container">
       <h2>JQuery support</h2>
       <p>Out of the box we can detect for jQuery and if it's present we can change the show/hide functions to slideDown/slideUp instead for a nicer out-of-the-box experience.</p>
-      <p><button onclick="jQueryify()">Click here</button> to load in jQuery. Then go back over the examples above to see the slide variation.</p>
+      <p><button class="button" onclick="jQueryify()">Click here</button> to load in jQuery. Then go back over the examples above to see the slide variation.</p>
     </div>
 
-    <script src="./show-if.js"></script>
+    <script src="./src/show-if.js"></script>
     <script>
       // jquerify.js
       // https://github.com/bgrins/devtools-snippets
