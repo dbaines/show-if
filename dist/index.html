@@ -307,6 +307,22 @@
       
       <h3>Multiple select</h3>
 
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <label class="control-label">Select "Yes"</label>
+            <div class="controls">
+              <select id="multi-select">
+
+              </select>
+              <div data-show-if="multi-or-raph_&_multi-or-don" data-show-type="any">
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <hr />
@@ -317,6 +333,75 @@
       <p>Match if the required string is anywhere in the input value by adding <code>data-show-type='any'</code>.</p>
       <h3>Type anything</h3>
       <p>Match if the field has any value at all with <code>data-show-type='*'</code>.</p>
+    </div>
+
+    <hr />
+
+    <div class="container">
+
+      <h2>Requiredness</h2>
+
+      <h3>Requiredness of hidden fields</h3>
+
+      <p>When hiding a required field, the <code>required</code> attribute will be removed and stored in another <code>data</code> attribute.</p>
+      <p>When showing a required field the <code>required</code> state will be re-applied.</p>
+      <p>This means that any hidden fields that are usually required will be omitted from requiredness.</p>
+
+      <h3>Dynamic Requirdness</h3>
+
+      <p>Sometimes fields might determine the requiredness of another field, rather than just showing or hiding the field.</p>
+
+      <p>This can be accomplished by using <code>data-required-if</code> <strong>instead of</strong> <code>data-show-if</code>.</p>
+
+      <p>For demonstration purposes, required fields have an outline.</p>
+
+      <p>You can add the attribute directly to the input:</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="required-basic" />
+          <label for="required-basic">Tick to make field required.</label>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <input type="text" placeholder="Oh hello" data-required-if="required-basic" />
+          </div>
+        </div>
+      </div>
+
+      <p>Or if you have a group of inputs that change requiredness, the attribute can be added to a wrapper element:</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="required-wrapper" />
+          <label for="required-wrapper">Tick to make fields required.</label>
+        </div>
+        <div class="control-group" data-required-if="required-wrapper">
+          <div class="controls inputs">
+            <div><input type="text" placeholder="Oh hello" /></div>
+            <div><input type="text" placeholder="Oh hello" /></div>
+            <div><input type="text" placeholder="Oh hello" /></div>
+            <div><input type="text" placeholder="Oh hello" /></div>
+            <div><input type="text" placeholder="Oh hello" /></div>
+          </div>
+        </div>
+      </div>
+
+      <p>Forms that use required markers can be automatically hidden and shown based on this same dynamic requiredness.</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="required-marker" />
+          <label for="required-marker">Tick to make field required.</label>
+        </div>
+        <div class="control-group">
+          <label for="required-marker-input"><abbr title="required">*</abbr>Dynamic required marker</label>
+          <div class="controls">
+            <input type="text" placeholder="Oh hello" data-required-if="required-marker" />
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <hr />
@@ -352,6 +437,8 @@
           </div>
         </div>
       </div>
+
+      <p><strong>UX Warning:</strong> It's important to only use this where it makes sense. If you have a control at the top of your form that shows a group of fields much further down the page, don't focus on those fields because it leads to the user being jumped down the page and losing the context of what they are doing.</p>
     </div>
 
     <hr />
@@ -431,12 +518,18 @@ var animateContent = function(){
     <hr />
 
     <div class="container">
+      <h2>ES6 Modules</h2>
+    </div>
+
+    <hr />
+
+    <div class="container">
       <h2>JQuery support</h2>
       <p>Out of the box we can detect for jQuery and if it's present we can change the show/hide functions to slideDown/slideUp instead for a nicer out-of-the-box experience.</p>
       <p><button class="button" onclick="jQueryify()">Click here</button> to load in jQuery. Then go back over the examples above to see the slide variation.</p>
     </div>
 
-    <script src="./src/show-if.js"></script>
+    <script src="./../src/show-if.js"></script>
     <script>
       // jquerify.js
       // https://github.com/bgrins/devtools-snippets

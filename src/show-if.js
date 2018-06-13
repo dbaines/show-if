@@ -73,11 +73,14 @@
     // can then restore that required state when showing again
     requiredStorage: "data-show-required",
 
+    requiredMarker: "abbr[title='required']",
+    requiredMarkerDisplayStorage: "data-required-if-display-type",
+
     // The value used to seperate out logical operations
     controlSeperator: "_&_",
 
     // .slideUp(), .slideDown() value
-    slideSpeed: "fast",
+    slideSpeed: 200,
 
     // Expose helper functions to the window object
     helpers: true,
@@ -173,7 +176,7 @@
 
   // Quick check to see if an element is an input type
   showIf._isInput = function($element) {
-    return $element.nodeName.toLowerCase().indexOf(showIf.settings.inputTypes) > -1;
+    return showIf.settings.inputTypes.indexOf($element.nodeName.toLowerCase()) > -1;
   }
 
   // Determine if a field should use .checked or .value
@@ -455,22 +458,27 @@
   // =========================================================================
 
   showIf.setRequired = function($target, required=false) {
-    $target.required = required;
+    if(showIf._isInput($target)) {
+      $target.required = required;
+    } else {
+      const $markers = $target.querySelectorAll(showIf.settings.requiredMarker);
+      const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
+        $input.required = required;
+      }
+      for(const $marker of $markers) {
+        const displayType = _getAttribute($marker, showIf.settings.requiredMarkerDisplayStorage) || "block";
+        $marker.style.display = required ? displayType : "hidden";
+      }
+    }
   }
 
   showIf.show = function($target, instant=false){
     showIf._beforeShow($target);
 
     // Required-if variation
-    if(_getAttribute($target, showIf.settings.requiredIf)) {
-      if(showIf._isInput($target)) {
-        showIf.setRequired($target, true);
-      } else {
-        const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
-        for(const $input of $inputs) {
-          showIf.setRequired($target, true);
-        }
-      }
+    if($target.hasAttribute(showIf.settings.requiredIf)) {
+      showIf.setRequired($target, true);
 
     // Show-if variation
     } else {
@@ -508,13 +516,13 @@
     showIf._beforeHide($target);
 
     // Required-if variation
-    if(_getAttribute($target, showIf.settings.requiredIf)) {
+    if($target.hasAttribute(showIf.settings.requiredIf)) {
       if(showIf._isInput($target)) {
         showIf.setRequired($target, false);
       } else {
         const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
         for(const $input of $inputs) {
-          showIf.setRequired($target, false);
+          showIf.setRequired($input, false);
         }
       }
 
