@@ -8,13 +8,8 @@
 */
 
 /*global jQuery */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define(factory);
-  } else {
-    root.showIf = factory(root);
-  }
-}(this, function () {
+(function() {
+  "use strict";
 
   let showIf = {
     version: "0.1.0",
@@ -64,6 +59,9 @@
     // Inverse logic
     inverse: "data-show-inverse",
 
+    // Focus on inputs in the hidden element
+    focusIn: "data-show-focus",
+
     // Disable hidden form fields when hiding
     disable: "data-show-disable",
 
@@ -75,11 +73,14 @@
     // can then restore that required state when showing again
     requiredStorage: "data-show-required",
 
+    requiredMarker: "abbr[title='required']",
+    requiredMarkerDisplayStorage: "data-required-if-display-type",
+
     // The value used to seperate out logical operations
     controlSeperator: "_&_",
 
     // .slideUp(), .slideDown() value
-    slideSpeed: "fast",
+    slideSpeed: 200,
 
     // Expose helper functions to the window object
     helpers: true,
@@ -175,7 +176,7 @@
 
   // Quick check to see if an element is an input type
   showIf._isInput = function($element) {
-    return $element.nodeName.toLowerCase().indexOf(showIf.settings.inputTypes) > -1;
+    return showIf.settings.inputTypes.indexOf($element.nodeName.toLowerCase()) > -1;
   }
 
   // Determine if a field should use .checked or .value
@@ -192,18 +193,20 @@
   // Find an element and make all input fields within disabled
   showIf._disableFieldsIn = function($element) {
     if($element.hasAttribute(showIf.settings.disable)) {
-      $element.querySelectorAll(showIf.settings.inputTypes).map($input => {
+      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
         $input.disabled = true;
-      })
+      }
     }
   }
 
   // Find an element and make all input fields within enabled
   showIf._enableFieldsIn = function($element) {
     if($element.hasAttribute(showIf.settings.disable)) {
-      $element.querySelectorAll(showIf.settings.inputTypes).map($input => {
+      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
         $input.disabled = false;
-      })
+      }
     }
   }
 
@@ -211,13 +214,14 @@
   // said element
   showIf._destroyDataIn = function($element) {
     if($element.hasAttribute(showIf.settings.destroy)) {
-      $element.querySelectorAll(showIf.settings.inputTypes).map($input => {
+      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
         if(showIf._isInputCheckable($input)) {
           $input.checked = false;
         } else {
           $input.value = "";
         }
-      });
+      }
     }
   }
 
@@ -231,6 +235,7 @@
 
   // Get the controls for a show rule, eg:
   // [data-show-if='foobar'] => #foobar
+  // [data-show-if='foo_&_bar'] => #foo,#bar
   showIf._getTargetControlsFor = function($target) {
     let $controls = [];
     const showRules = showIf._getShowRuleForElement($target);
@@ -261,7 +266,7 @@
     const inputName = _getAttribute($input, "name");
     let $siblingTargets = [];
     if(inputName) {
-      $siblingTargets = document.querySelectorAll("[name='" + inputName + "]");
+      $siblingTargets = document.querySelectorAll("[name='" + inputName + "']");
     }
 
     const changeFunction = function(event, instant=false) {
@@ -276,9 +281,9 @@
 
     // Check on change events
     if($siblingTargets.length) {
-      $siblingTargets.map($ibling => {
+      for(const $sibling of $siblingTargets) {
         $sibling.addEventListener("change", changeFunction);
-      });
+      }
     } else {
       $input.addEventListener("change", changeFunction);
     }
@@ -356,14 +361,14 @@
       if(useProp) {
         if($input.checked === valueToCheck) {
           numberOfTargetsHit++;
-        } else if($input.val() === valueToCheck) {
+        } else if($input.value === valueToCheck) {
           numberOfTargetsHit++;
         }
       }
     });
 
     // Match any or all?
-    if(_getAttribute($element, showIf.settings.showType) === "any") {
+    if(_getAttribute($target, showIf.settings.showType) === "any") {
       // If match any, check that there's at least one hit
       shouldShow = numberOfTargetsHit > 0;
     } else {
@@ -414,7 +419,7 @@
   }
 
   showIf.decernMultipleRadio = function($target, $inputs, instant=false, callback=false) {
-    const shouldShow = showIf._decernMultipleFields(target, $inputs, selectOption);
+    const shouldShow = showIf._decernMultipleFields($target, $inputs);
     if(callback) {
       callback($target, shouldShow, instant);
     } else {
@@ -453,22 +458,27 @@
   // =========================================================================
 
   showIf.setRequired = function($target, required=false) {
-    $target.required = required;
+    if(showIf._isInput($target)) {
+      $target.required = required;
+    } else {
+      const $markers = $target.querySelectorAll(showIf.settings.requiredMarker);
+      const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
+      for(const $input of $inputs) {
+        $input.required = required;
+      }
+      for(const $marker of $markers) {
+        const displayType = _getAttribute($marker, showIf.settings.requiredMarkerDisplayStorage) || "block";
+        $marker.style.display = required ? displayType : "hidden";
+      }
+    }
   }
 
   showIf.show = function($target, instant=false){
     showIf._beforeShow($target);
 
     // Required-if variation
-    if(_getAttribute($target, showIf.settings.requiredIf)) {
-      if(showIf._isInput($target)) {
-        showIf.setRequired($target, true);
-      } else {
-        const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
-        for($input of $inputs) {
-          showIf.setRequired($target, true);
-        }
-      }
+    if($target.hasAttribute(showIf.settings.requiredIf)) {
+      showIf.setRequired($target, true);
 
     // Show-if variation
     } else {
@@ -482,6 +492,23 @@
         }
       }
     }
+
+    // Focus
+    if($target.hasAttribute(showIf.settings.focusIn)) {
+      const focusTarget = _getAttribute($target, showIf.settings.focusIn) || showIf.settings.inputTypes;
+      const $inputs = $target.querySelectorAll(focusTarget);
+      for(const $input of $inputs) {
+        if($input.offsetWidth > 0 && $input.offsetHeight > 0) {
+          $input.focus();
+        }
+      }
+    }
+
+    // Re-enable
+    if($target.hasAttribute(showIf.settings.disable)) {
+      showIf._enableFieldsIn($target);
+    }
+
     showIf._afterShow($target);
   }
 
@@ -489,13 +516,13 @@
     showIf._beforeHide($target);
 
     // Required-if variation
-    if(_getAttribute($target, showIf.settings.requiredIf)) {
+    if($target.hasAttribute(showIf.settings.requiredIf)) {
       if(showIf._isInput($target)) {
         showIf.setRequired($target, false);
       } else {
         const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
-        for($input of $inputs) {
-          showIf.setRequired($target, false);
+        for(const $input of $inputs) {
+          showIf.setRequired($input, false);
         }
       }
 
@@ -511,6 +538,17 @@
         }
       }
     }
+
+    // Disable
+    if($target.hasAttribute(showIf.settings.disable)) {
+      showIf._disableFieldsIn($target);
+    }
+
+    // Destroy
+    if($target.hasAttribute(showIf.settings.destroy)) {
+      showIf._destroyDataIn($target);
+    }
+
     showIf._afterHide($target);
   }
 
@@ -547,7 +585,7 @@
   }
 
   showIf.toggle = function($target, shouldShow=false, instant=false) {
-    if(_getAttribute($target, showIf.settings.inverse)) {
+    if($target.hasAttribute(showIf.settings.inverse)) {
       shouldShow = !shouldShow;
     }
     if(shouldShow) {
@@ -595,9 +633,10 @@
   }
 
   // Initialise if running in the browser
-  if(this === window) {
+  if(typeof(window) !== "undefined") {
     showIf.init();
   }
 
   return showIf;
-}));
+
+}());
