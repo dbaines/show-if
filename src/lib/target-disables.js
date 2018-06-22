@@ -1,5 +1,9 @@
 import { settings } from './settings';
 
+const targetShouldDisable = function($target){
+  return $target.hasAttribute(settings.disable);
+}
+
 // Find an element and make all input fields within disabled
 const disableFieldsIn = function($element) {
   if($element.hasAttribute(settings.disable)) {
@@ -20,4 +24,4 @@ const enableFieldsIn = function($element) {
   }
 }
 
-export { disableFieldsIn, enableFieldsIn };
+export { targetShouldDisable, disableFieldsIn, enableFieldsIn };

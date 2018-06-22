@@ -1,6 +1,10 @@
 import { settings} from './settings';
 import { isInputCheckable } from './input-helpers';
 
+const targetShouldDestroy = function($target){
+  return $target.hasAttribute(settings.destroy);
+}
+
 // Find an element and destroy all data in any form fields inside
 // said element
 const destroyDataIn = function($element) {
@@ -16,4 +20,4 @@ const destroyDataIn = function($element) {
   }
 }
 
-export { destroyDataIn };
+export { targetShouldDestroy, destroyDataIn };

@@ -106,18 +106,6 @@
     return $target.hasAttribute(settings.requiredIf);
   };
 
-  var targetShouldDisable = function targetShouldDisable($target) {
-    return $target.hasAttribute(settings.disable);
-  };
-
-  var targetShouldDestroy = function targetShouldDestroy($target) {
-    return $target.hasAttribute(settings.destroy);
-  };
-
-  var targetShouldFocusIn = function targetShouldFocusIn($target) {
-    return $target.hasAttribute(settings.focusIn);
-  };
-
   // Quick check to see if an element is an input type
   var isInput = function isInput($element) {
     return settings.inputTypes.indexOf($element.nodeName.toLowerCase()) > -1;
@@ -132,6 +120,45 @@
     } else {
       return false;
     }
+  };
+
+  var targetShouldFocusIn = function targetShouldFocusIn($target) {
+    return $target.hasAttribute(settings.focusIn);
+  };
+
+  var focusInTarget = function focusInTarget($target) {
+    var focusTarget = getAttribute($target, settings.focusIn) || settings.inputTypes;
+    var $inputs = $target.querySelectorAll(focusTarget);
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var $input = _step.value;
+
+        if ($input.offsetWidth > 0 && $input.offsetHeight > 0) {
+          $input.focus();
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+  };
+
+  var targetShouldDisable = function targetShouldDisable($target) {
+    return $target.hasAttribute(settings.disable);
   };
 
   // Find an element and make all input fields within disabled
@@ -196,6 +223,10 @@
     }
   };
 
+  var targetShouldDestroy = function targetShouldDestroy($target) {
+    return $target.hasAttribute(settings.destroy);
+  };
+
   // Find an element and destroy all data in any form fields inside
   // said element
   var destroyDataIn = function destroyDataIn($element) {
@@ -232,6 +263,53 @@
     }
   };
 
+  // Get the show value for this element
+  // can either be set in data-show-if or data-required-if
+  var getShowRuleForTarget = function getShowRuleForTarget($element) {
+    var ruleTypes = ["showIf", "requiredIf"];
+    var rule = "";
+    ruleTypes.filter(function (type) {
+      var attribute = settings[type];
+      var value = getAttribute($element, attribute);
+      if (value) {
+        rule = value;
+        return;
+      }
+    });
+    return rule;
+  };
+
+  // Get the dom nodes for a target rule
+  var getControlId = function getControlId(id) {
+    if (settings.getControlId) {
+      return settings.getControlId(id);
+    } else {
+      return document.getElementById(id);
+    }
+  };
+
+  // Get the controls for a show rule, eg:
+  // [data-show-if='foobar'] => #foobar
+  // [data-show-if='foo_&_bar'] => #foo,#bar
+  var getTargetControlsFor = function getTargetControlsFor($target) {
+    var $controls = [];
+    var showRules = getShowRuleForTarget($target);
+    // Create an array of required targets
+    // split by the control seperator
+    if (showRules) {
+      var controlLabels = [showRules];
+      if (showRules.indexOf(settings.controlSeperator) > -1) {
+        controlLabels = showRules.split(settings.controlSeperator);
+      }
+      controlLabels.map(function (label) {
+        $controls.push(getControlId(label));
+      });
+    } else {
+      console.warn("[SHOWJS] No controls found for element - does it contain a show target attribute such as `data-show-if`?");
+    }
+    return $controls;
+  };
+
   /*!
    * ShowIf is used to show/hide elements based 
    * on form selections using simple HTML data-attribute
@@ -255,7 +333,11 @@
       _isInputCheckable: isInputCheckable,
       _disableFieldsIn: disableFieldsIn,
       _enableFieldsIn: enableFieldsIn,
-      _destroyDataIn: destroyDataIn
+      _destroyDataIn: destroyDataIn,
+      _focusInTarget: focusInTarget,
+      _getTargetControlsFor: getTargetControlsFor,
+      _getShowRuleForElement: getShowRuleForTarget,
+      _getControlId: getControlId
 
       // =========================================================================
       // Expose helpers to the window for more advanced usage
@@ -297,56 +379,6 @@
       if (showIf.settings.afterHide) {
         showIf.settings.afterHide($element);
       }
-    };
-
-    // =========================================================================
-    // Internal functions
-    // =========================================================================
-
-    // Get the show value for this element
-    // can either be set in data-show-if or data-required-if
-    showIf._getShowRuleForElement = function ($element) {
-      var ruleTypes = ["showIf", "requiredIf"];
-      var rule = "";
-      ruleTypes.filter(function (type) {
-        var attribute = showIf.settings[type];
-        var value = getAttribute($element, attribute);
-        if (value) {
-          rule = value;
-          return;
-        }
-      });
-      return rule;
-    };
-
-    showIf._getControlId = function (id) {
-      if (showIf.settings.getControlId) {
-        return showIf.settings.getControlId(id);
-      } else {
-        return document.getElementById(id);
-      }
-    };
-
-    // Get the controls for a show rule, eg:
-    // [data-show-if='foobar'] => #foobar
-    // [data-show-if='foo_&_bar'] => #foo,#bar
-    showIf._getTargetControlsFor = function ($target) {
-      var $controls = [];
-      var showRules = showIf._getShowRuleForElement($target);
-      // Create an array of required targets
-      // split by the control seperator
-      if (showRules) {
-        var controlLabels = [showRules];
-        if (showRules.indexOf(showIf.settings.controlSeperator) > -1) {
-          controlLabels = showRules.split(showIf.settings.controlSeperator);
-        }
-        controlLabels.map(function (label) {
-          $controls.push(showIf._getControlId(label));
-        });
-      } else {
-        console.warn("[SHOWJS] No controls found for element - does it contain a show target attribute such as `data-show-if`?");
-      }
-      return $controls;
     };
 
     // =========================================================================
@@ -688,34 +720,7 @@
 
       // Focus
       if (showIf._targetShouldFocusIn($target)) {
-        var focusTarget = getAttribute($target, showIf.settings.focusIn) || showIf.settings.inputTypes;
-        var $inputs = $target.querySelectorAll(focusTarget);
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
-
-        try {
-          for (var _iterator4 = $inputs[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var $input = _step4.value;
-
-            if ($input.offsetWidth > 0 && $input.offsetHeight > 0) {
-              $input.focus();
-            }
-          }
-        } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion4 && _iterator4.return) {
-              _iterator4.return();
-            }
-          } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
-            }
-          }
-        }
+        showIf._focusInTarget($target);
       }
 
       // Re-enable
@@ -824,23 +829,23 @@
     // Then get the controls that determine their visibility
     // Then set the visibility based on those controls' state
     showIf.bindListeners = function () {
-      var _iteratorNormalCompletion5 = true;
-      var _didIteratorError5 = false;
-      var _iteratorError5 = undefined;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
 
       try {
-        for (var _iterator5 = showIf.$targets[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-          var $target = _step5.value;
+        for (var _iterator4 = showIf.$targets[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var $target = _step4.value;
 
           // Get the input controls for this target
           var $allControls = showIf._getTargetControlsFor($target);
-          var _iteratorNormalCompletion6 = true;
-          var _didIteratorError6 = false;
-          var _iteratorError6 = undefined;
+          var _iteratorNormalCompletion5 = true;
+          var _didIteratorError5 = false;
+          var _iteratorError5 = undefined;
 
           try {
-            for (var _iterator6 = $allControls[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-              var $thisControl = _step6.value;
+            for (var _iterator5 = $allControls[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+              var $thisControl = _step5.value;
 
               // Determine which sort of input control this is
               var type = getAttribute($thisControl, "type");
@@ -858,31 +863,31 @@
               }
             }
           } catch (err) {
-            _didIteratorError6 = true;
-            _iteratorError6 = err;
+            _didIteratorError5 = true;
+            _iteratorError5 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                _iterator6.return();
+              if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                _iterator5.return();
               }
             } finally {
-              if (_didIteratorError6) {
-                throw _iteratorError6;
+              if (_didIteratorError5) {
+                throw _iteratorError5;
               }
             }
           }
         }
       } catch (err) {
-        _didIteratorError5 = true;
-        _iteratorError5 = err;
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion5 && _iterator5.return) {
-            _iterator5.return();
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
           }
         } finally {
-          if (_didIteratorError5) {
-            throw _iteratorError5;
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }

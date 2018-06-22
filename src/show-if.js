@@ -1,10 +1,12 @@
 import { version } from '../package.json';
 import { settings } from './lib/settings';
 import _getAttribute from './lib/get-attribute';
-import { targetIsRequiredIf, targetShouldDisable, targetShouldDestroy, targetShouldFocusIn } from './lib/target-helpers';
+import { targetIsRequiredIf } from './lib/target-required';
 import { isInput, isInputCheckable } from './lib/input-helpers';
-import { disableFieldsIn, enableFieldsIn } from './lib/target-disables';
-import { destroyDataIn } from './lib/target-destroy';
+import { targetShouldFocusIn, focusInTarget } from './lib/target-focus';
+import { targetShouldDisable, disableFieldsIn, enableFieldsIn } from './lib/target-disables';
+import { targetShouldDestroy, destroyDataIn } from './lib/target-destroy';
+import { getShowRuleForTarget, getControlId, getTargetControlsFor } from './lib/get-target-rules';
 
 /*!
  * ShowIf is used to show/hide elements based 
@@ -31,6 +33,10 @@ import { destroyDataIn } from './lib/target-destroy';
     _disableFieldsIn: disableFieldsIn,
     _enableFieldsIn: enableFieldsIn,
     _destroyDataIn: destroyDataIn,
+    _focusInTarget: focusInTarget,
+    _getTargetControlsFor: getTargetControlsFor,
+    _getShowRuleForElement: getShowRuleForTarget,
+    _getControlId: getControlId,
   }
 
   // =========================================================================
@@ -81,59 +87,6 @@ import { destroyDataIn } from './lib/target-destroy';
     } else {
       //
     }
-  }
-
-  // =========================================================================
-  // Internal functions
-  // =========================================================================
-
-  // Get the show value for this element
-  // can either be set in data-show-if or data-required-if
-  showIf._getShowRuleForElement = function($element) {
-    const ruleTypes = [
-      "showIf",
-      "requiredIf",
-    ];
-    let rule = "";
-    ruleTypes.filter(type => {
-      const attribute = showIf.settings[type];
-      const value = _getAttribute($element, attribute);
-      if(value) {
-        rule = value;
-        return;
-      }
-    });
-    return rule;
-  }
-
-  showIf._getControlId = function(id) {
-    if(showIf.settings.getControlId) {
-      return showIf.settings.getControlId(id);
-    } else {
-      return document.getElementById(id);
-    }
-  }
-
-  // Get the controls for a show rule, eg:
-  // [data-show-if='foobar'] => #foobar
-  // [data-show-if='foo_&_bar'] => #foo,#bar
-  showIf._getTargetControlsFor = function($target) {
-    let $controls = [];
-    const showRules = showIf._getShowRuleForElement($target);
-    // Create an array of required targets
-    // split by the control seperator
-    if(showRules) {
-      let controlLabels = [showRules];
-      if(showRules.indexOf(showIf.settings.controlSeperator) > -1) {
-        controlLabels = showRules.split(showIf.settings.controlSeperator);
-      }
-      controlLabels.map(label => {
-        $controls.push(showIf._getControlId(label));
-      });
-    } else {
-      console.warn("[SHOWJS] No controls found for element - does it contain a show target attribute such as `data-show-if`?");
-    }
-    return $controls;
   }
 
   // =========================================================================
@@ -384,13 +337,7 @@ import { destroyDataIn } from './lib/target-destroy';
 
     // Focus
     if(showIf._targetShouldFocusIn($target)) {
-      const focusTarget = _getAttribute($target, showIf.settings.focusIn) || showIf.settings.inputTypes;
-      const $inputs = $target.querySelectorAll(focusTarget);
-      for(const $input of $inputs) {
-        if($input.offsetWidth > 0 && $input.offsetHeight > 0) {
-          $input.focus();
-        }
-      }
+      showIf._focusInTarget($target);
     }
 
     // Re-enable
