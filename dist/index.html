@@ -231,6 +231,71 @@
 
     <div class="container">
 
+      <h2>Multiple matches (OR)</h2>
+
+      <h3>Multiple checkboxes</h3>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <div>Select Donatello or Raphael</div>
+            <div class="controls">
+              <div>
+                <input type="checkbox" id="multi-or-leo" />
+                <label for="multi-or-leo">Leonardo<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-or-don" />
+                <label for="multi-or-don">Donatello<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-or-raph" />
+                <label for="multi-or-raph">Raphael<label>
+              </div>
+              <div>
+                <input type="checkbox" id="multi-or-mike" />
+                <label for="multi-or-mike">Michaelangelo<label>
+              </div>
+              <div data-show-if="multi-or-raph_&&_multi-or-don" data-show-type="any">
+                <input type="text" placeholder="Oh hello" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Single select with multiple options</h3>
+
+      <p>Use <code>data-select-option="value1_&&_value2"</code> along with <code>data-select-type="any"</code></p>
+
+      <div class="spacing">
+        <div class="inputs">
+          <div class="control-group">
+            <label class="control-label">Select "Yes" or "No"</label>
+            <div class="controls">
+              <select id="multi-single-select">
+                <option>Please select</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="maybe">Maybe</option>
+              </select>
+            </div>
+          </div>
+          <div class="control-group" data-show-if="multi-single-select" data-show-option="yes_&&_no" data-show-type="any">
+            <label for="multi-single-select-hidden">Hidden field</label>
+            <div class="controls">
+              <input type="text" placeholder="Oh hello" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <hr />
+
+    <div class="container">
+
       <h2>Multiple matches (AND)</h2>
 
       <h3>Multiple checkboxes</h3>
@@ -266,45 +331,34 @@
         </div>
       </div>
 
-    </div>
+      <h3>Single select with multiple options</h3>
 
-    <hr />
+      <p>TODO</p>
 
-    <div class="container">
-
-      <h2>Multiple matches (OR)</h2>
-
-      <h3>Multiple checkboxes</h3>
+      <p>Use <code>data-select-option="value1_&&_value2"</code>.</p>
 
       <div class="spacing">
         <div class="inputs">
           <div class="control-group">
-            <div>Select Donatello or Raphael</div>
+            <label class="control-label">Select "Yes" or "No"</label>
             <div class="controls">
-              <div>
-                <input type="checkbox" id="multi-or-leo" />
-                <label for="multi-or-leo">Leonardo<label>
-              </div>
-              <div>
-                <input type="checkbox" id="multi-or-don" />
-                <label for="multi-or-don">Donatello<label>
-              </div>
-              <div>
-                <input type="checkbox" id="multi-or-raph" />
-                <label for="multi-or-raph">Raphael<label>
-              </div>
-              <div>
-                <input type="checkbox" id="multi-or-mike" />
-                <label for="multi-or-mike">Michaelangelo<label>
-              </div>
-              <div data-show-if="multi-or-raph_&&_multi-or-don" data-show-type="any">
-                <input type="text" placeholder="Oh hello" />
-              </div>
+              <select id="multi-multiple-select" multiple>
+                <option>Please select</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="maybe">Maybe</option>
+              </select>
+            </div>
+          </div>
+          <div class="control-group" data-show-if="multi-multiple-select" data-show-option="yes_&&_no">
+            <label for="multi-multiple-hidden">Hidden field</label>
+            <div class="controls">
+              <input type="text" placeholder="Oh hello" />
             </div>
           </div>
         </div>
       </div>
-      
+
       <h3>Multiple select</h3>
 
       <div class="spacing">
@@ -312,12 +366,27 @@
           <div class="control-group">
             <label class="control-label">Select "Yes"</label>
             <div class="controls">
-              <select id="multi-select">
-
+              <select id="multi-select-or-one">
+                <option>Please select</option>
+                <option>Yes</option>
+                <option>No</option>
               </select>
-              <div data-show-if="multi-or-raph_&&_multi-or-don" data-show-type="any">
-                <input type="text" placeholder="Oh hello" />
-              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">AND Select "Yes" here</label>
+            <div class="controls">
+              <select id="multi-select-or-two">
+                <option>Please select</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+          <div class="control-group" data-show-if="multi-select-or-one_&&_multi-select-or-two" data-show-option="yes">
+            <label for="multi-select-hidden">Hidden field</label>
+            <div class="controls">
+              <input type="text" placeholder="Oh hello" />
             </div>
           </div>
         </div>

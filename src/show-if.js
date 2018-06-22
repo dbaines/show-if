@@ -414,7 +414,7 @@
   showIf.decernMultipleSelect = function($target, $inputs, instant=false, callback) {
     let selectOption = _getAttribute($target, showIf.settings.showIfSelectOption);
     if(selectOption) {
-      const shouldShow = showIf._decernMultipleFields(target, $inputs, selectOption);
+      const shouldShow = showIf._decernMultipleFields($target, $inputs, selectOption);
       if(callback) {
         callback($target, shouldShow, instant);
       } else {
