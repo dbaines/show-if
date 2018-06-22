@@ -235,7 +235,7 @@
 
       <h3>Multiple checkboxes</h3>
 
-      <p>Simply seperate your IDs with a <code>_&_</code>, eg: <code>multi-and-raph_&_multi-and-don</code>.</p>
+      <p>Simply seperate your IDs with a <code>_&&_</code>, eg: <code>multi-and-raph_&&_multi-and-don</code>.</p>
 
       <div class="spacing">
         <div class="inputs">
@@ -258,7 +258,7 @@
                 <input type="checkbox" id="multi-and-mike" />
                 <label for="multi-and-mike">Michaelangelo<label>
               </div>
-              <div data-show-if="multi-and-raph_&_multi-and-don">
+              <div data-show-if="multi-and-raph_&&_multi-and-don">
                 <input type="text" placeholder="Oh hello" />
               </div>
             </div>
@@ -297,7 +297,7 @@
                 <input type="checkbox" id="multi-or-mike" />
                 <label for="multi-or-mike">Michaelangelo<label>
               </div>
-              <div data-show-if="multi-or-raph_&_multi-or-don" data-show-type="any">
+              <div data-show-if="multi-or-raph_&&_multi-or-don" data-show-type="any">
                 <input type="text" placeholder="Oh hello" />
               </div>
             </div>
@@ -315,7 +315,7 @@
               <select id="multi-select">
 
               </select>
-              <div data-show-if="multi-or-raph_&_multi-or-don" data-show-type="any">
+              <div data-show-if="multi-or-raph_&&_multi-or-don" data-show-type="any">
                 <input type="text" placeholder="Oh hello" />
               </div>
             </div>
@@ -394,10 +394,25 @@
           <input type="checkbox" id="required-marker" />
           <label for="required-marker">Tick to make field required.</label>
         </div>
-        <div class="control-group">
+        <div class="control-group" data-required-if="required-marker">
           <label for="required-marker-input"><abbr title="required">*</abbr>Dynamic required marker</label>
           <div class="controls">
-            <input type="text" placeholder="Oh hello" data-required-if="required-marker" />
+            <input type="text" placeholder="Oh hello" />
+          </div>
+        </div>
+      </div>
+
+      <p>This works with <code>data-show-inverse</code> as well:</p>
+
+      <div class="inputs">
+        <div class="control-group">
+          <input type="checkbox" id="required-marker-inverse" />
+          <label for="required-marker-inverse">Tick to make field not required.</label>
+        </div>
+        <div class="control-group" data-required-if="required-marker-inverse" data-show-inverse>
+          <label for="required-marker-input"><abbr title="required">*</abbr>Dynamic required marker</label>
+          <div class="controls">
+            <input type="text" placeholder="Oh hello" />
           </div>
         </div>
       </div>

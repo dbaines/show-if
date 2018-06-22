@@ -77,7 +77,7 @@
     requiredMarkerDisplayStorage: "data-required-if-display-type",
 
     // The value used to seperate out logical operations
-    controlSeperator: "_&_",
+    controlSeperator: "_&&_",
 
     // .slideUp(), .slideDown() value
     slideSpeed: 200,
@@ -473,18 +473,25 @@
   // Show / Hide functions
   // =========================================================================
 
+  // Set the requiredness of input fields inside the target element
   showIf.setRequired = function($target, required=false) {
     if(showIf._isInput($target)) {
       $target.required = required;
     } else {
-      const $markers = $target.querySelectorAll(showIf.settings.requiredMarker);
       const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
+      const $markers = $target.querySelectorAll(showIf.settings.requiredMarker);
       for(const $input of $inputs) {
         $input.required = required;
       }
       for(const $marker of $markers) {
-        const displayType = _getAttribute($marker, showIf.settings.requiredMarkerDisplayStorage) || "block";
-        $marker.style.display = required ? displayType : "hidden";
+        // If hiding, store the current display type in a data attribute
+        if(!required) {
+          $marker.setAttribute(showIf.settings.requiredMarkerDisplayStorage, $marker.style.display);
+        }
+        // Set marker display style to none if not required
+        // otherwise get the display type from storage
+        const displayType = required ? _getAttribute($marker, showIf.settings.requiredMarkerDisplayStorage) || "inline" : "none";
+        $marker.style.display = displayType;
       }
     }
   }
@@ -535,14 +542,7 @@
 
     // Required-if variation
     if(showIf._targetIsRequiredIf($target)) {
-      if(showIf._isInput($target)) {
-        showIf.setRequired($target, false);
-      } else {
-        const $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
-        for(const $input of $inputs) {
-          showIf.setRequired($input, false);
-        }
-      }
+      showIf.setRequired($target, false);
 
     // Show-if variation
     } else {
