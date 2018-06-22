@@ -95,6 +95,13 @@
 
   var settings = buildSettings();
 
+  // Simple helper to get an attribute if an element has the attribute
+  // eg. element.getAttribute("blah") will crash if element does not have an
+  // attribute of "blah"
+  function _getAttribute ($element, attribute) {
+    return $element.hasAttribute(attribute) && $element.getAttribute(attribute);
+  }
+
   /*!
    * ShowIf is used to show/hide elements based 
    * on form selections using simple HTML data-attribute
@@ -112,22 +119,14 @@
       settings: settings
 
       // =========================================================================
-      // Helpers
+      // Expose helpers to the window for more advanced usage
+      // This can be triggered simply by creating a window object:
+      // window.showIf = {
+      //   helpers: true
+      // }
       // =========================================================================
 
-    };var _getAttribute = function _getAttribute($element, attribute) {
-      return $element.hasAttribute(attribute) && $element.getAttribute(attribute);
-    };
-
-    // =========================================================================
-    // Expose helpers to the window for more advanced usage
-    // This can be triggered simply by creating a window object:
-    // window.showIf = {
-    //   helpers: true
-    // }
-    // =========================================================================
-
-    showIf._exposeHelpers = function () {
+    };showIf._exposeHelpers = function () {
       if (showIf.settings.helpers) {
         window.showIf = showIf;
       }

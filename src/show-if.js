@@ -1,5 +1,6 @@
 import { version } from '../package.json';
 import settings from './lib/settings';
+import _getAttribute from './lib/get-attribute';
 
 /*!
  * ShowIf is used to show/hide elements based 
@@ -17,14 +18,6 @@ import settings from './lib/settings';
   let showIf = {
     version: version,
     settings: settings,
-  }
-
-  // =========================================================================
-  // Helpers
-  // =========================================================================
-
-  const _getAttribute = function($element, attribute) {
-    return $element.hasAttribute(attribute) && $element.getAttribute(attribute);
   }
 
   // =========================================================================
