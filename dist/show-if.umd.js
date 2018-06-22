@@ -4,6 +4,8 @@
   (factory());
 }(this, (function () { 'use strict';
 
+  var version = "0.1.0";
+
   var _extends = Object.assign || function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
@@ -31,7 +33,7 @@
   (function () {
 
     var showIf = {
-      version: "0.1.0"
+      version: version
 
       // =========================================================================
       // Helpers

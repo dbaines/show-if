@@ -359,6 +359,12 @@
         </div>
       </div>
 
+      <div data-show="{
+        
+      }">
+
+      </div>
+
       <h3>Multiple select</h3>
 
       <div class="spacing">
@@ -368,22 +374,24 @@
             <div class="controls">
               <select id="multi-select-or-one">
                 <option>Please select</option>
-                <option>Yes</option>
-                <option>No</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="maybe">Maybe</option>
               </select>
             </div>
           </div>
           <div class="control-group">
-            <label class="control-label">AND Select "Yes" here</label>
+            <label class="control-label">AND Select "No" here</label>
             <div class="controls">
               <select id="multi-select-or-two">
                 <option>Please select</option>
-                <option>Yes</option>
-                <option>No</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="maybe">Maybe</option>
               </select>
             </div>
           </div>
-          <div class="control-group" data-show-if="multi-select-or-one_&&_multi-select-or-two" data-show-option="yes">
+          <div class="control-group" data-show-if="multi-select-or-one_&&_multi-select-or-two" data-show-option="yes_&&_no">
             <label for="multi-select-hidden">Hidden field</label>
             <div class="controls">
               <input type="text" placeholder="Oh hello" />

@@ -1,3 +1,5 @@
+import { version } from '../package.json';
+
 /*!
  * ShowIf is used to show/hide elements based 
  * on form selections using simple HTML data-attribute
@@ -12,7 +14,7 @@
   "use strict";
 
   let showIf = {
-    version: "0.1.0",
+    version: version,
   }
 
   // =========================================================================
