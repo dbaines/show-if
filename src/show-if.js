@@ -7,6 +7,11 @@ import { targetShouldFocusIn, focusInTarget } from './lib/target-focus';
 import { targetShouldDisable, disableFieldsIn, enableFieldsIn } from './lib/target-disables';
 import { targetShouldDestroy, destroyDataIn } from './lib/target-destroy';
 import { getShowRuleForTarget, getControlId, getTargetControlsFor } from './lib/get-target-rules';
+import checkValue from './lib/discerns/discern-value';
+
+import discernMultipleFields from './lib/discerns/discern-multiple-fields';
+import discernSelect from './lib/discerns/discern-select';
+import { discernRadio, discernMultipleRadio } from './lib/discerns/discern-radio';
 
 /*!
  * ShowIf is used to show/hide elements based 
@@ -37,6 +42,12 @@ import { getShowRuleForTarget, getControlId, getTargetControlsFor } from './lib/
     _getTargetControlsFor: getTargetControlsFor,
     _getShowRuleForElement: getShowRuleForTarget,
     _getControlId: getControlId,
+    _checkValue: checkValue,
+
+    _decernMultipleFields: discernMultipleFields,
+    decernSelect: discernSelect,
+    decernRadio: discernRadio,
+    decernMultipleRadio: discernMultipleRadio,
   }
 
   // =========================================================================
@@ -158,77 +169,6 @@ import { getShowRuleForTarget, getControlId, getTargetControlsFor } from './lib/
   // Checking and matching
   // =========================================================================
 
-  // Check a value against an array of values or a single value
-  // eg:
-  // "test", ["foo", bar"] = false
-  // "test", "foobar" = false
-  // "test", ["foo", "bar", "test"] = true
-  // "test", "test" = true
-  showIf._checkValue = function(currentValue, requiredValue) {
-    if(requiredValue.indexOf(showIf.settings.controlSeperator) > -1) {
-      requiredValue = requiredValue.split(showIf.settings.controlSeperator);
-      return requiredValue.indexOf(currentValue) > -1;
-    } else {
-      return currentValue === requiredValue;
-    }
-  }
-
-  showIf._decernMultipleFields = function($target, $inputs, value=true) {
-    const numberOfTargets = $inputs.length;
-    let shouldShow = false;
-    let numberOfTargetsHit = 0;
-
-    // Check if there are multiple values passed in eg:
-    // value1_&_value2
-    const multipleValues = (value + "").indexOf(showIf.settings.controlSeperator) > -1;
-    if(multipleValues) {
-      value = value.split(showIf.settings.controlSeperator);
-    }
-
-    // Loop through all controls
-    $inputs.map(($input, index) => {
-      let valueToCheck = value;
-      const useProp = showIf._isInputCheckable($input);
-      if(multipleValues) {
-        valueToCheck = value[index] || true;
-      }
-      if(useProp) {
-        if($input.checked === valueToCheck) {
-          numberOfTargetsHit++;
-        } else if($input.value === valueToCheck) {
-          numberOfTargetsHit++;
-        }
-      }
-    });
-
-    // Match any or all?
-    if(_getAttribute($target, showIf.settings.showType) === "any") {
-      // If match any, check that there's at least one hit
-      shouldShow = numberOfTargetsHit > 0;
-    } else {
-      // If match all, check if the number of targets hit matches the
-      // number of targets
-      shouldShow = numberOfTargetsHit === numberOfTargets;
-    }
-
-    return shouldShow;
-  }
-
-  showIf.decernSelect = function($target, $select, instant=false, callback=false) {
-    let selectOption = _getAttribute($target, showIf.settings.showIfSelectOption);
-    if(selectOption) {
-      const shouldShow = showIf._checkValue($select.value, selectOption);
-      showIf.toggle($target, shouldShow, instant);
-      if(callback) {
-        callback($target, shouldShow, instant);
-      } else {
-        return shouldShow;
-      }
-    } else {
-      console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
-    }
-  }
-
   showIf.decernMultipleSelect = function($target, $inputs, instant=false, callback) {
     let selectOption = _getAttribute($target, showIf.settings.showIfSelectOption);
     if(selectOption) {
@@ -240,24 +180,6 @@ import { getShowRuleForTarget, getControlId, getTargetControlsFor } from './lib/
       }
     } else {
       console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
-    }
-  }
-
-  showIf.decernRadio = function($target, $input, instant=false, callback=false) {
-    const shouldShow = $input.checked === true;
-    if(callback) {
-      callback($target, shouldShow, instant);
-    } else {
-      return shouldShow;
-    }
-  }
-
-  showIf.decernMultipleRadio = function($target, $inputs, instant=false, callback=false) {
-    const shouldShow = showIf._decernMultipleFields($target, $inputs);
-    if(callback) {
-      callback($target, shouldShow, instant);
-    } else {
-      return shouldShow;
     }
   }
 

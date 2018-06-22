@@ -310,6 +310,105 @@
     return $controls;
   };
 
+  // Check a value against an array of values or a single value
+  // eg:
+  // "test", ["foo", bar"] = false
+  // "test", "foobar" = false
+  // "test", ["foo", "bar", "test"] = true
+  // "test", "test" = true
+  var checkValue = function checkValue(currentValue, requiredValue) {
+    if (requiredValue.indexOf(settings.controlSeperator) > -1) {
+      requiredValue = requiredValue.split(settings.controlSeperator);
+      return requiredValue.indexOf(currentValue) > -1;
+    } else {
+      return currentValue === requiredValue;
+    }
+  };
+
+  var discernMultipleFields = function discernMultipleFields($target, $inputs) {
+    var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+    var numberOfTargets = $inputs.length;
+    var shouldShow = false;
+    var numberOfTargetsHit = 0;
+
+    // Check if there are multiple values passed in eg:
+    // value1_&_value2
+    var multipleValues = (value + "").indexOf(settings.controlSeperator) > -1;
+    if (multipleValues) {
+      value = value.split(settings.controlSeperator);
+    }
+
+    // Loop through all controls
+    $inputs.map(function ($input, index) {
+      var valueToCheck = value;
+      var useProp = isInputCheckable($input);
+      if (multipleValues) {
+        valueToCheck = value[index] || true;
+      }
+      if (useProp) {
+        if ($input.checked === valueToCheck) {
+          numberOfTargetsHit++;
+        } else if ($input.value === valueToCheck) {
+          numberOfTargetsHit++;
+        }
+      }
+    });
+
+    // Match any or all?
+    if (getAttribute($target, settings.showType) === "any") {
+      // If match any, check that there's at least one hit
+      shouldShow = numberOfTargetsHit > 0;
+    } else {
+      // If match all, check if the number of targets hit matches the
+      // number of targets
+      shouldShow = numberOfTargetsHit === numberOfTargets;
+    }
+
+    return shouldShow;
+  };
+
+  var discernSelect = function discernSelect($target, $select) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var selectOption = getAttribute($target, settings.showIfSelectOption);
+    if (selectOption) {
+      var shouldShow = checkValue($select.value, selectOption);
+      if (callback) {
+        callback($target, shouldShow, instant);
+      } else {
+        return shouldShow;
+      }
+    } else {
+      console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
+    }
+  };
+
+  var discernRadio = function discernRadio($target, $input) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var shouldShow = $input.checked === true;
+    if (callback) {
+      callback($target, shouldShow, instant);
+    } else {
+      return shouldShow;
+    }
+  };
+
+  var discernMultipleRadio = function discernMultipleRadio($target, $inputs) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var shouldShow = discernMultipleFields($target, $inputs);
+    if (callback) {
+      callback($target, shouldShow, instant);
+    } else {
+      return shouldShow;
+    }
+  };
+
   /*!
    * ShowIf is used to show/hide elements based 
    * on form selections using simple HTML data-attribute
@@ -337,7 +436,13 @@
       _focusInTarget: focusInTarget,
       _getTargetControlsFor: getTargetControlsFor,
       _getShowRuleForElement: getShowRuleForTarget,
-      _getControlId: getControlId
+      _getControlId: getControlId,
+      _checkValue: checkValue,
+
+      _decernMultipleFields: discernMultipleFields,
+      decernSelect: discernSelect,
+      decernRadio: discernRadio,
+      decernMultipleRadio: discernMultipleRadio
 
       // =========================================================================
       // Expose helpers to the window for more advanced usage
@@ -477,82 +582,6 @@
     // Checking and matching
     // =========================================================================
 
-    // Check a value against an array of values or a single value
-    // eg:
-    // "test", ["foo", bar"] = false
-    // "test", "foobar" = false
-    // "test", ["foo", "bar", "test"] = true
-    // "test", "test" = true
-    showIf._checkValue = function (currentValue, requiredValue) {
-      if (requiredValue.indexOf(showIf.settings.controlSeperator) > -1) {
-        requiredValue = requiredValue.split(showIf.settings.controlSeperator);
-        return requiredValue.indexOf(currentValue) > -1;
-      } else {
-        return currentValue === requiredValue;
-      }
-    };
-
-    showIf._decernMultipleFields = function ($target, $inputs) {
-      var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-      var numberOfTargets = $inputs.length;
-      var shouldShow = false;
-      var numberOfTargetsHit = 0;
-
-      // Check if there are multiple values passed in eg:
-      // value1_&_value2
-      var multipleValues = (value + "").indexOf(showIf.settings.controlSeperator) > -1;
-      if (multipleValues) {
-        value = value.split(showIf.settings.controlSeperator);
-      }
-
-      // Loop through all controls
-      $inputs.map(function ($input, index) {
-        var valueToCheck = value;
-        var useProp = showIf._isInputCheckable($input);
-        if (multipleValues) {
-          valueToCheck = value[index] || true;
-        }
-        if (useProp) {
-          if ($input.checked === valueToCheck) {
-            numberOfTargetsHit++;
-          } else if ($input.value === valueToCheck) {
-            numberOfTargetsHit++;
-          }
-        }
-      });
-
-      // Match any or all?
-      if (getAttribute($target, showIf.settings.showType) === "any") {
-        // If match any, check that there's at least one hit
-        shouldShow = numberOfTargetsHit > 0;
-      } else {
-        // If match all, check if the number of targets hit matches the
-        // number of targets
-        shouldShow = numberOfTargetsHit === numberOfTargets;
-      }
-
-      return shouldShow;
-    };
-
-    showIf.decernSelect = function ($target, $select) {
-      var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-      var selectOption = getAttribute($target, showIf.settings.showIfSelectOption);
-      if (selectOption) {
-        var shouldShow = showIf._checkValue($select.value, selectOption);
-        showIf.toggle($target, shouldShow, instant);
-        if (callback) {
-          callback($target, shouldShow, instant);
-        } else {
-          return shouldShow;
-        }
-      } else {
-        console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
-      }
-    };
-
     showIf.decernMultipleSelect = function ($target, $inputs) {
       var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var callback = arguments[3];
@@ -567,30 +596,6 @@
         }
       } else {
         console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
-      }
-    };
-
-    showIf.decernRadio = function ($target, $input) {
-      var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-      var shouldShow = $input.checked === true;
-      if (callback) {
-        callback($target, shouldShow, instant);
-      } else {
-        return shouldShow;
-      }
-    };
-
-    showIf.decernMultipleRadio = function ($target, $inputs) {
-      var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-      var shouldShow = showIf._decernMultipleFields($target, $inputs);
-      if (callback) {
-        callback($target, shouldShow, instant);
-      } else {
-        return shouldShow;
       }
     };
 
