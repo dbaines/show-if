@@ -78,4 +78,5 @@ const buildSettings = function(){
 
 const settings = buildSettings();
 
+export { defaults, buildSettings, settings };
 export default settings;

@@ -98,9 +98,139 @@
   // Simple helper to get an attribute if an element has the attribute
   // eg. element.getAttribute("blah") will crash if element does not have an
   // attribute of "blah"
-  function _getAttribute ($element, attribute) {
+  function getAttribute ($element, attribute) {
     return $element.hasAttribute(attribute) && $element.getAttribute(attribute);
   }
+
+  var targetIsRequiredIf = function targetIsRequiredIf($target) {
+    return $target.hasAttribute(settings.requiredIf);
+  };
+
+  var targetShouldDisable = function targetShouldDisable($target) {
+    return $target.hasAttribute(settings.disable);
+  };
+
+  var targetShouldDestroy = function targetShouldDestroy($target) {
+    return $target.hasAttribute(settings.destroy);
+  };
+
+  var targetShouldFocusIn = function targetShouldFocusIn($target) {
+    return $target.hasAttribute(settings.focusIn);
+  };
+
+  // Quick check to see if an element is an input type
+  var isInput = function isInput($element) {
+    return settings.inputTypes.indexOf($element.nodeName.toLowerCase()) > -1;
+  };
+
+  // Determine if a field should use .checked or .value
+  // ie. is this field a checkbox or a radio?
+  var isInputCheckable = function isInputCheckable($input) {
+    var type = getAttribute($input, "type");
+    if (type) {
+      return type === "checkbox" || type === "radio";
+    } else {
+      return false;
+    }
+  };
+
+  // Find an element and make all input fields within disabled
+  var disableFieldsIn = function disableFieldsIn($element) {
+    if ($element.hasAttribute(settings.disable)) {
+      var $inputs = $element.querySelectorAll(settings.inputTypes);
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var $input = _step.value;
+
+          $input.disabled = true;
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+  };
+
+  // Find an element and make all input fields within enabled
+  var enableFieldsIn = function enableFieldsIn($element) {
+    if ($element.hasAttribute(settings.disable)) {
+      var $inputs = $element.querySelectorAll(settings.inputTypes);
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = $inputs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var $input = _step2.value;
+
+          $input.disabled = false;
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    }
+  };
+
+  // Find an element and destroy all data in any form fields inside
+  // said element
+  var destroyDataIn = function destroyDataIn($element) {
+    if ($element.hasAttribute(settings.destroy)) {
+      var $inputs = $element.querySelectorAll(settings.inputTypes);
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var $input = _step.value;
+
+          if (isInputCheckable($input)) {
+            $input.checked = false;
+          } else {
+            $input.value = "";
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+  };
 
   /*!
    * ShowIf is used to show/hide elements based 
@@ -116,7 +246,16 @@
 
     var showIf = {
       version: version,
-      settings: settings
+      settings: settings,
+      _targetIsRequiredIf: targetIsRequiredIf,
+      _targetShouldDisable: targetShouldDisable,
+      _targetShouldDestroy: targetShouldDestroy,
+      _targetShouldFocusIn: targetShouldFocusIn,
+      _isInput: isInput,
+      _isInputCheckable: isInputCheckable,
+      _disableFieldsIn: disableFieldsIn,
+      _enableFieldsIn: enableFieldsIn,
+      _destroyDataIn: destroyDataIn
 
       // =========================================================================
       // Expose helpers to the window for more advanced usage
@@ -171,143 +310,13 @@
       var rule = "";
       ruleTypes.filter(function (type) {
         var attribute = showIf.settings[type];
-        var value = _getAttribute($element, attribute);
+        var value = getAttribute($element, attribute);
         if (value) {
           rule = value;
           return;
         }
       });
       return rule;
-    };
-
-    // Quick check to see if an element is an input type
-    showIf._isInput = function ($element) {
-      return showIf.settings.inputTypes.indexOf($element.nodeName.toLowerCase()) > -1;
-    };
-
-    // Determine if a field should use .checked or .value
-    // ie. is this field a checkbox or a radio?
-    showIf._isInputCheckable = function ($input) {
-      var type = _getAttribute($input, "type");
-      if (type) {
-        return type === "checkbox" || type === "radio";
-      } else {
-        return false;
-      }
-    };
-
-    showIf._targetIsRequiredIf = function ($target) {
-      return $target.hasAttribute(showIf.settings.requiredIf);
-    };
-
-    showIf._targetShouldDisable = function ($target) {
-      return $target.hasAttribute(showIf.settings.disable);
-    };
-
-    showIf._targetShouldDestroy = function ($target) {
-      return $target.hasAttribute(showIf.settings.destroy);
-    };
-
-    showIf._targetShouldFocusIn = function ($target) {
-      return $target.hasAttribute(showIf.settings.focusIn);
-    };
-
-    // Find an element and make all input fields within disabled
-    showIf._disableFieldsIn = function ($element) {
-      if ($element.hasAttribute(showIf.settings.disable)) {
-        var $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var $input = _step.value;
-
-            $input.disabled = true;
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-      }
-    };
-
-    // Find an element and make all input fields within enabled
-    showIf._enableFieldsIn = function ($element) {
-      if ($element.hasAttribute(showIf.settings.disable)) {
-        var $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = $inputs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var $input = _step2.value;
-
-            $input.disabled = false;
-          }
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-              _iterator2.return();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-      }
-    };
-
-    // Find an element and destroy all data in any form fields inside
-    // said element
-    showIf._destroyDataIn = function ($element) {
-      if ($element.hasAttribute(showIf.settings.destroy)) {
-        var $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
-
-        try {
-          for (var _iterator3 = $inputs[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var $input = _step3.value;
-
-            if (showIf._isInputCheckable($input)) {
-              $input.checked = false;
-            } else {
-              $input.value = "";
-            }
-          }
-        } catch (err) {
-          _didIteratorError3 = true;
-          _iteratorError3 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion3 && _iterator3.return) {
-              _iterator3.return();
-            }
-          } finally {
-            if (_didIteratorError3) {
-              throw _iteratorError3;
-            }
-          }
-        }
-      }
     };
 
     showIf._getControlId = function (id) {
@@ -348,7 +357,7 @@
       // Get the name of the input element and check if there
       // are other inputs with the same name (eg. collections, radio, 
       // checkboxes)
-      var inputName = _getAttribute($input, "name");
+      var inputName = getAttribute($input, "name");
       var $siblingTargets = [];
       if (inputName) {
         $siblingTargets = document.querySelectorAll("[name='" + inputName + "']");
@@ -368,27 +377,27 @@
 
       // Check on change events
       if ($siblingTargets.length) {
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
 
         try {
-          for (var _iterator4 = $siblingTargets[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var $sibling = _step4.value;
+          for (var _iterator = $siblingTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var $sibling = _step.value;
 
             $sibling.addEventListener("change", changeFunction);
           }
         } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
+          _didIteratorError = true;
+          _iteratorError = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion4 && _iterator4.return) {
-              _iterator4.return();
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
             }
           } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
+            if (_didIteratorError) {
+              throw _iteratorError;
             }
           }
         }
@@ -482,7 +491,7 @@
       });
 
       // Match any or all?
-      if (_getAttribute($target, showIf.settings.showType) === "any") {
+      if (getAttribute($target, showIf.settings.showType) === "any") {
         // If match any, check that there's at least one hit
         shouldShow = numberOfTargetsHit > 0;
       } else {
@@ -498,7 +507,7 @@
       var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
-      var selectOption = _getAttribute($target, showIf.settings.showIfSelectOption);
+      var selectOption = getAttribute($target, showIf.settings.showIfSelectOption);
       if (selectOption) {
         var shouldShow = showIf._checkValue($select.value, selectOption);
         showIf.toggle($target, shouldShow, instant);
@@ -516,7 +525,7 @@
       var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var callback = arguments[3];
 
-      var selectOption = _getAttribute($target, showIf.settings.showIfSelectOption);
+      var selectOption = getAttribute($target, showIf.settings.showIfSelectOption);
       if (selectOption) {
         var shouldShow = showIf._decernMultipleFields($target, $inputs, selectOption);
         if (callback) {
@@ -558,9 +567,9 @@
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
       var shouldShow = false;
-      var valueToMatch = _getAttribute($target, showIf.settings.showIfInputValue).toLowerCase();
+      var valueToMatch = getAttribute($target, showIf.settings.showIfInputValue).toLowerCase();
       var valueLower = $input.value.toLowerCase();
-      var showType = _getAttribute($target, showIf.settings.showType);
+      var showType = getAttribute($target, showIf.settings.showType);
 
       // value to match is required if type isn't set to *
       if (showType !== "*" && !valueToMatch) {
@@ -595,38 +604,38 @@
       } else {
         var $inputs = $target.querySelectorAll(showIf.settings.inputTypes);
         var $markers = $target.querySelectorAll(showIf.settings.requiredMarker);
-        var _iteratorNormalCompletion5 = true;
-        var _didIteratorError5 = false;
-        var _iteratorError5 = undefined;
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
 
         try {
-          for (var _iterator5 = $inputs[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var $input = _step5.value;
+          for (var _iterator2 = $inputs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var $input = _step2.value;
 
             $input.required = required;
           }
         } catch (err) {
-          _didIteratorError5 = true;
-          _iteratorError5 = err;
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion5 && _iterator5.return) {
-              _iterator5.return();
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
             }
           } finally {
-            if (_didIteratorError5) {
-              throw _iteratorError5;
+            if (_didIteratorError2) {
+              throw _iteratorError2;
             }
           }
         }
 
-        var _iteratorNormalCompletion6 = true;
-        var _didIteratorError6 = false;
-        var _iteratorError6 = undefined;
+        var _iteratorNormalCompletion3 = true;
+        var _didIteratorError3 = false;
+        var _iteratorError3 = undefined;
 
         try {
-          for (var _iterator6 = $markers[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var $marker = _step6.value;
+          for (var _iterator3 = $markers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var $marker = _step3.value;
 
             // If hiding, store the current display type in a data attribute
             if (!required) {
@@ -634,20 +643,20 @@
             }
             // Set marker display style to none if not required
             // otherwise get the display type from storage
-            var displayType = required ? _getAttribute($marker, showIf.settings.requiredMarkerDisplayStorage) || "inline" : "none";
+            var displayType = required ? getAttribute($marker, showIf.settings.requiredMarkerDisplayStorage) || "inline" : "none";
             $marker.style.display = displayType;
           }
         } catch (err) {
-          _didIteratorError6 = true;
-          _iteratorError6 = err;
+          _didIteratorError3 = true;
+          _iteratorError3 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion6 && _iterator6.return) {
-              _iterator6.return();
+            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+              _iterator3.return();
             }
           } finally {
-            if (_didIteratorError6) {
-              throw _iteratorError6;
+            if (_didIteratorError3) {
+              throw _iteratorError3;
             }
           }
         }
@@ -679,31 +688,31 @@
 
       // Focus
       if (showIf._targetShouldFocusIn($target)) {
-        var focusTarget = _getAttribute($target, showIf.settings.focusIn) || showIf.settings.inputTypes;
+        var focusTarget = getAttribute($target, showIf.settings.focusIn) || showIf.settings.inputTypes;
         var $inputs = $target.querySelectorAll(focusTarget);
-        var _iteratorNormalCompletion7 = true;
-        var _didIteratorError7 = false;
-        var _iteratorError7 = undefined;
+        var _iteratorNormalCompletion4 = true;
+        var _didIteratorError4 = false;
+        var _iteratorError4 = undefined;
 
         try {
-          for (var _iterator7 = $inputs[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var $input = _step7.value;
+          for (var _iterator4 = $inputs[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+            var $input = _step4.value;
 
             if ($input.offsetWidth > 0 && $input.offsetHeight > 0) {
               $input.focus();
             }
           }
         } catch (err) {
-          _didIteratorError7 = true;
-          _iteratorError7 = err;
+          _didIteratorError4 = true;
+          _iteratorError4 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion7 && _iterator7.return) {
-              _iterator7.return();
+            if (!_iteratorNormalCompletion4 && _iterator4.return) {
+              _iterator4.return();
             }
           } finally {
-            if (_didIteratorError7) {
-              throw _iteratorError7;
+            if (_didIteratorError4) {
+              throw _iteratorError4;
             }
           }
         }
@@ -815,29 +824,29 @@
     // Then get the controls that determine their visibility
     // Then set the visibility based on those controls' state
     showIf.bindListeners = function () {
-      var _iteratorNormalCompletion8 = true;
-      var _didIteratorError8 = false;
-      var _iteratorError8 = undefined;
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
 
       try {
-        for (var _iterator8 = showIf.$targets[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-          var $target = _step8.value;
+        for (var _iterator5 = showIf.$targets[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var $target = _step5.value;
 
           // Get the input controls for this target
           var $allControls = showIf._getTargetControlsFor($target);
-          var _iteratorNormalCompletion9 = true;
-          var _didIteratorError9 = false;
-          var _iteratorError9 = undefined;
+          var _iteratorNormalCompletion6 = true;
+          var _didIteratorError6 = false;
+          var _iteratorError6 = undefined;
 
           try {
-            for (var _iterator9 = $allControls[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-              var $thisControl = _step9.value;
+            for (var _iterator6 = $allControls[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              var $thisControl = _step6.value;
 
               // Determine which sort of input control this is
-              var type = _getAttribute($thisControl, "type");
-              var isTextInput = _getAttribute($target, showIf.settings.showIfInput);
+              var type = getAttribute($thisControl, "type");
+              var isTextInput = getAttribute($target, showIf.settings.showIfInput);
               var isCheckboxOrRadio = type === "radio" || type === "checkbox";
-              var isSelect = _getAttribute($target, showIf.settings.showIfSelectOption);
+              var isSelect = getAttribute($target, showIf.settings.showIfSelectOption);
 
               // Bind the appopriate listeners to this controls
               if (isCheckboxOrRadio) {
@@ -849,31 +858,31 @@
               }
             }
           } catch (err) {
-            _didIteratorError9 = true;
-            _iteratorError9 = err;
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                _iterator9.return();
+              if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                _iterator6.return();
               }
             } finally {
-              if (_didIteratorError9) {
-                throw _iteratorError9;
+              if (_didIteratorError6) {
+                throw _iteratorError6;
               }
             }
           }
         }
       } catch (err) {
-        _didIteratorError8 = true;
-        _iteratorError8 = err;
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion8 && _iterator8.return) {
-            _iterator8.return();
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
           }
         } finally {
-          if (_didIteratorError8) {
-            throw _iteratorError8;
+          if (_didIteratorError5) {
+            throw _iteratorError5;
           }
         }
       }

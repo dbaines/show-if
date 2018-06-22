@@ -1,6 +1,10 @@
 import { version } from '../package.json';
-import settings from './lib/settings';
+import { settings } from './lib/settings';
 import _getAttribute from './lib/get-attribute';
+import { targetIsRequiredIf, targetShouldDisable, targetShouldDestroy, targetShouldFocusIn } from './lib/target-helpers';
+import { isInput, isInputCheckable } from './lib/input-helpers';
+import { disableFieldsIn, enableFieldsIn } from './lib/target-disables';
+import { destroyDataIn } from './lib/target-destroy';
 
 /*!
  * ShowIf is used to show/hide elements based 
@@ -18,6 +22,15 @@ import _getAttribute from './lib/get-attribute';
   let showIf = {
     version: version,
     settings: settings,
+    _targetIsRequiredIf: targetIsRequiredIf,
+    _targetShouldDisable: targetShouldDisable,
+    _targetShouldDestroy: targetShouldDestroy,
+    _targetShouldFocusIn: targetShouldFocusIn,
+    _isInput: isInput,
+    _isInputCheckable: isInputCheckable,
+    _disableFieldsIn: disableFieldsIn,
+    _enableFieldsIn: enableFieldsIn,
+    _destroyDataIn: destroyDataIn,
   }
 
   // =========================================================================
@@ -91,73 +104,6 @@ import _getAttribute from './lib/get-attribute';
       }
     });
     return rule;
-  }
-
-  // Quick check to see if an element is an input type
-  showIf._isInput = function($element) {
-    return showIf.settings.inputTypes.indexOf($element.nodeName.toLowerCase()) > -1;
-  }
-
-  // Determine if a field should use .checked or .value
-  // ie. is this field a checkbox or a radio?
-  showIf._isInputCheckable = function($input) {
-    const type = _getAttribute($input, "type");
-    if(type) {
-      return type === "checkbox" || type === "radio";
-    } else {
-      return false;
-    }
-  }
-
-  showIf._targetIsRequiredIf = function($target) {
-    return $target.hasAttribute(showIf.settings.requiredIf);
-  }
-
-  showIf._targetShouldDisable = function($target){
-    return $target.hasAttribute(showIf.settings.disable);
-  }
-
-  showIf._targetShouldDestroy = function($target){
-    return $target.hasAttribute(showIf.settings.destroy);
-  }
-
-  showIf._targetShouldFocusIn = function($target) {
-    return $target.hasAttribute(showIf.settings.focusIn);
-  }
-
-  // Find an element and make all input fields within disabled
-  showIf._disableFieldsIn = function($element) {
-    if($element.hasAttribute(showIf.settings.disable)) {
-      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
-      for(const $input of $inputs) {
-        $input.disabled = true;
-      }
-    }
-  }
-
-  // Find an element and make all input fields within enabled
-  showIf._enableFieldsIn = function($element) {
-    if($element.hasAttribute(showIf.settings.disable)) {
-      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
-      for(const $input of $inputs) {
-        $input.disabled = false;
-      }
-    }
-  }
-
-  // Find an element and destroy all data in any form fields inside
-  // said element
-  showIf._destroyDataIn = function($element) {
-    if($element.hasAttribute(showIf.settings.destroy)) {
-      const $inputs = $element.querySelectorAll(showIf.settings.inputTypes);
-      for(const $input of $inputs) {
-        if(showIf._isInputCheckable($input)) {
-          $input.checked = false;
-        } else {
-          $input.value = "";
-        }
-      }
-    }
   }
 
   showIf._getControlId = function(id) {
