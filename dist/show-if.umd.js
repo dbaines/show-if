@@ -135,10 +135,14 @@
   // [data-show-if='foobar'] => #foobar
   // [data-show-if='foo_&_bar'] => #foo,#bar
   var getTargetControlsFor = function getTargetControlsFor($target) {
-    var $controls = [];
     var showRules = getShowRuleForTarget($target);
-    // Create an array of required targets
-    // split by the control seperator
+    return getControlsFromRule(showRules);
+  };
+
+  // Create an array of required targets
+  // split by the control seperator
+  var getControlsFromRule = function getControlsFromRule(showRules) {
+    var $controls = [];
     if (showRules) {
       var controlLabels = [showRules];
       if (showRules.indexOf(settings.controlSeperator) > -1) {

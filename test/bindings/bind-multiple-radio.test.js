@@ -1,6 +1,7 @@
 const { changeChecked } = require('./../test-helpers/change-input');
 const { settings } = require('./../../src/lib/settings');
 const bindRadio = require('./../../src/lib/bindings/bind-radio').default;
+const { getControlsFromRule } = require('./../../src/lib/get-target-rules');
 
 describe("Bindings", () => {
 
@@ -64,6 +65,50 @@ describe("Bindings", () => {
         changeChecked($inputGroup.querySelector("#test-1"), true);
         expect($target.style.display).toBe("block");
         changeChecked($inputGroup.querySelector("#test-2"), true);
+        expect($target.style.display).toBe("none");
+      });
+
+    });
+
+    describe('Requires option 1 or 4', () => {
+
+      beforeEach(() => {
+        $controlInput = $inputGroup.querySelector("#test-1");
+        const $allControls = getControlsFromRule("test-1_&&_test-4");
+        $target.setAttribute(settings.showType, "any");
+        bindRadio($controlInput, $allControls, $target);
+      });
+
+      test("Visible when option 1 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Visible when option 4 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-4"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Visible when option 1 then 4 are selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"),true);
+        changeChecked($inputGroup.querySelector("#test-4"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Run through options", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-0"),true);
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"),true);
+        expect($target.style.display).toBe("block");
+        changeChecked($inputGroup.querySelector("#test-3"),true);
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-4"),true);
+        expect($target.style.display).toBe("block");
+        changeChecked($inputGroup.querySelector("#test-0"),true);
         expect($target.style.display).toBe("none");
       });
 
@@ -141,6 +186,67 @@ describe("Bindings", () => {
 
     });
 
+    describe('Requires option 1 and 2', () => {
+
+      beforeEach(() => {
+        $controlInput = $inputGroup.querySelector("#test-1");
+        const $allControls = getControlsFromRule("test-1_&&_test-2");
+        bindRadio($controlInput, $allControls, $target);
+      });
+
+      test("Hidden when option 0 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-0"),true);
+        expect($target.style.display).toBe("none");
+      });
+
+      test("Hidden when option 1 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"), true);
+        expect($target.style.display).toBe("none");
+      });
+
+      test("Hidden when option 1 and 3 are selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"), true);
+        changeChecked($inputGroup.querySelector("#test-3"), true);
+        expect($target.style.display).toBe("none");
+      });
+
+      test("Visible when option 1 and 2 are selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"), true);
+        changeChecked($inputGroup.querySelector("#test-2"), true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Visible when option 1 and 2 are selected, then hidden when 2 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"), true);
+        changeChecked($inputGroup.querySelector("#test-2"), true);
+        expect($target.style.display).toBe("block");
+        changeChecked($inputGroup.querySelector("#test-2"), false);
+        expect($target.style.display).toBe("none");
+      });
+
+    });
+
+    describe('Requires option 2 or 3', () => {
+
+      beforeEach(() => {
+        $controlInput = $inputGroup.querySelector("#test-2");
+        const $allControls = getControlsFromRule("test-2_&&_test-3");
+        $target.setAttribute(settings.showType, "any");
+        bindRadio($controlInput, $allControls, $target);
+      });
+
+      test("Hidden when option 0 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-0"),true);
+        expect($target.style.display).toBe("none");
+      });
+
+    });
 
   });
 

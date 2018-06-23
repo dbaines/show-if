@@ -33,10 +33,14 @@ const getControlId = function(id) {
 // [data-show-if='foobar'] => #foobar
 // [data-show-if='foo_&_bar'] => #foo,#bar
 const getTargetControlsFor = function($target) {
-  let $controls = [];
   const showRules = getShowRuleForTarget($target);
-  // Create an array of required targets
-  // split by the control seperator
+  return getControlsFromRule(showRules);
+}
+
+// Create an array of required targets
+// split by the control seperator
+const getControlsFromRule = function(showRules) {
+  let $controls = [];
   if(showRules) {
     let controlLabels = [showRules];
     if(showRules.indexOf(settings.controlSeperator) > -1) {
@@ -51,4 +55,4 @@ const getTargetControlsFor = function($target) {
   return $controls;
 }
 
-export { getShowRuleForTarget, getControlId, getTargetControlsFor };
+export { getShowRuleForTarget, getControlId, getTargetControlsFor, getControlsFromRule };
