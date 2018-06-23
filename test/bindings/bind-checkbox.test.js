@@ -1,16 +1,27 @@
-const { createInput } = require('./../test-helpers/create-input');
-const { createTarget } = require('./../test-helpers/create-target');
-const { changeInput, changeChecked } = require('./../test-helpers/change-input');
 const { settings } = require('./../../src/lib/settings');
 const bindCheckbox = require('./../../src/lib/bindings/bind-checkbox').default;
 
 describe("Bindings", () => {
 
+  let $input, $target, $nestedInput;
+
+  beforeEach(() => {
+    $target = document.createElement("div");
+    $nestedInput = document.createElement("input");
+    $nestedInput.type = "text";
+    $target.appendChild($nestedInput);
+    return true;
+  });
+
   describe('Single Radios', () => {
+
+    beforeEach(() => {
+      $input = document.createElement("input");
+      $input.type = "radio";
+      return true;
+    });
   
     test("Hidden when unchecked", () => {
-      const $input = createInput("radio");
-      const $target = createTarget();
       // Check that element is visible by default
       expect($target.style.display).toBe("");
       bindCheckbox($input, false, $target);
@@ -19,8 +30,6 @@ describe("Bindings", () => {
     });
   
     test("Visible when checked", () => {
-      const $input = createInput("radio");
-      const $target = createTarget();
       bindCheckbox($input, false, $target);
       // Expect element to be hidden by default
       expect($target.style.display).toBe("none");
@@ -31,10 +40,7 @@ describe("Bindings", () => {
     });
 
     test("Disable - Disabled on hide and enabled on show", () => {
-      const $input = createInput("radio");
-      const $target = createTarget({ disable: true });
-      const $nestedInput = createInput("text");
-      $target.appendChild($nestedInput);
+      $target.setAttribute(settings.disable, "");
       // Expect input to be enabled
       expect($nestedInput.disabled).toBe(false);
       // Bind
@@ -47,9 +53,7 @@ describe("Bindings", () => {
     });
 
     test("Destroy - Data emptied when hiding", () => {
-      const $input = createInput("radio");
-      const $target = createTarget({ destroy: true });
-      const $nestedInput = createInput("text");
+      $target.setAttribute(settings.destroy, "");
       $nestedInput.value = "test data";
       $target.appendChild($nestedInput);
       // Expect value to be set
@@ -61,8 +65,7 @@ describe("Bindings", () => {
     });
 
     test("Inverse - Hidden when checked", () => {
-      const $input = createInput("radio");
-      const $target = createTarget({ inverse: true });
+      $target.setAttribute(settings.inverse, "");
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
       bindCheckbox($input, false, $target);
@@ -74,8 +77,8 @@ describe("Bindings", () => {
     });
   
     test("Inverse - Visible when unchecked", () => {
-      const $input = createInput("radio", { checked: true });
-      const $target = createTarget({ inverse: true });
+      $target.setAttribute(settings.inverse, "");
+      $input.checked = true;
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
       bindCheckbox($input, false, $target);
@@ -85,14 +88,47 @@ describe("Bindings", () => {
       changeChecked($input, false);
       expect($target.style.display).toBe("block");
     });
+
+    test("Inverse + Disable - Disabled on hide and enabled on show", () => {
+      $target.setAttribute(settings.inverse, "");
+      $target.setAttribute(settings.disable, "");
+      // Expect input to be enabled
+      expect($nestedInput.disabled).toBe(false);
+      // Bind
+      bindCheckbox($input, false, $target);
+      // Expect input to be disabled
+      expect($nestedInput.disabled).toBe(false);
+      // Change input to checked
+      changeChecked($input, true);
+      expect($nestedInput.disabled).toBe(true);
+    });
+
+    test("Inverse + Destroy - Data emptied when hiding", () => {
+      $target.setAttribute(settings.inverse, "");
+      $target.setAttribute(settings.destroy, "");
+      $nestedInput.value = "test data";
+      $target.appendChild($nestedInput);
+      // Expect value to be set
+      expect($nestedInput.value).toBe("test data");
+      // Bind
+      bindCheckbox($input, false, $target);
+      // Expect value to be removed
+      expect($nestedInput.value).toBe("test data");
+      changeChecked($input, true);
+      expect($nestedInput.value).toBe("");
+    });
   
   });
   
   describe('Single Checkbox', () => {
   
+    beforeEach(() => {
+      $input = document.createElement("input");
+      $input.type = "checkbox";
+      return true;
+    });
+  
     test("Hidden when unchecked", () => {
-      const $input = createInput("checkbox");
-      const $target = createTarget();
       // Check that element is visible by default
       expect($target.style.display).toBe("");
       bindCheckbox($input, false, $target);
@@ -101,8 +137,6 @@ describe("Bindings", () => {
     });
   
     test("Visible when checked", () => {
-      const $input = createInput("checkbox");
-      const $target = createTarget();
       bindCheckbox($input, false, $target);
       // Expect element to be hidden by default
       expect($target.style.display).toBe("none");
@@ -112,9 +146,33 @@ describe("Bindings", () => {
       expect($target.style.display).toBe("block");
     });
 
+    test("Disable - Disabled on hide and enabled on show", () => {
+      $target.setAttribute(settings.disable, "");
+      // Expect input to be enabled
+      expect($nestedInput.disabled).toBe(false);
+      // Bind
+      bindCheckbox($input, false, $target);
+      // Expect input to be disabled
+      expect($nestedInput.disabled).toBe(true);
+      // Change input to checked
+      changeChecked($input, true);
+      expect($nestedInput.disabled).toBe(false);
+    });
+
+    test("Destroy - Data emptied when hiding", () => {
+      $target.setAttribute(settings.destroy, "");
+      $nestedInput.value = "test data";
+      $target.appendChild($nestedInput);
+      // Expect value to be set
+      expect($nestedInput.value).toBe("test data");
+      // Bind
+      bindCheckbox($input, false, $target);
+      // Expect value to be removed
+      expect($nestedInput.value).toBe("");
+    });
+
     test("Inverse - Hidden when checked", () => {
-      const $input = createInput("checkbox");
-      const $target = createTarget({ inverse: true });
+      $target.setAttribute(settings.inverse, "");
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
       bindCheckbox($input, false, $target);
@@ -126,8 +184,8 @@ describe("Bindings", () => {
     });
   
     test("Inverse - Visible when unchecked", () => {
-      const $input = createInput("checkbox", { checked: true });
-      const $target = createTarget({ inverse: true });
+      $target.setAttribute(settings.inverse, "");
+      $input.checked = true;
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
       bindCheckbox($input, false, $target);
@@ -136,6 +194,35 @@ describe("Bindings", () => {
       // Uncheck input and expect that element is now visible
       changeChecked($input, false);
       expect($target.style.display).toBe("block");
+    });
+
+    test("Inverse + Disable - Disabled on hide and enabled on show", () => {
+      $target.setAttribute(settings.inverse, "");
+      $target.setAttribute(settings.disable, "");
+      // Expect input to be enabled
+      expect($nestedInput.disabled).toBe(false);
+      // Bind
+      bindCheckbox($input, false, $target);
+      // Expect input to be disabled
+      expect($nestedInput.disabled).toBe(false);
+      // Change input to checked
+      changeChecked($input, true);
+      expect($nestedInput.disabled).toBe(true);
+    });
+
+    test("Inverse + Destroy - Data emptied when hiding", () => {
+      $target.setAttribute(settings.inverse, "");
+      $target.setAttribute(settings.destroy, "");
+      $nestedInput.value = "test data";
+      $target.appendChild($nestedInput);
+      // Expect value to be set
+      expect($nestedInput.value).toBe("test data");
+      // Bind
+      bindCheckbox($input, false, $target);
+      // Expect value to be removed
+      expect($nestedInput.value).toBe("test data");
+      changeChecked($input, true);
+      expect($nestedInput.value).toBe("");
     });
   
   });
