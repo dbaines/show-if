@@ -60,6 +60,8 @@ const defaults = {
   // Expose helper functions to the window object
   helpers: true,
 
+  eventPrefix: 'show-if',
+
 }
 
 // Build out settings from the defaults and then

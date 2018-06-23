@@ -610,6 +610,45 @@ var animateContent = function(){
     <hr />
 
     <div class="container">
+      <h2>Events</h2>
+
+      <p>There are four events that you can listen to on the show/hide elements; <code>beforeHide</code>, <code>afterHide</code>, <code>beforeShow</code>, <code>afterShow</code>.</p>
+
+      <h3>HTML5 CustomEvents</h3>
+
+      <p>You can use <code>event.detail.showTarget</code> to get the element that's showing or hiding if you need to.</p>
+
+      <pre>// Bounce element after showing
+var element = document.getElementById("my-hidden-field");
+element.addEventListener("show-if:afterShow", function(event){
+  bounce(event.detail.showIfTarget);
+}</pre>
+
+      <h3>JQuery</h3>
+
+      <p>If jQuery is detected they will also be exposed as jQuery triggers and can be used like so:</p>
+
+      <pre>// Bounce element after showing
+$("#my-hidden-field").on("show-if:before-show", function(event, $target) {
+  bounce($target);
+});</pre>
+
+      <h3>Window callbacks</h3>
+
+      <p>There is also the option to pass in a these events via the <code>window.showIf</code> variable. These callbacks will be used for every case of a show/hide:</p>
+
+      <pre>// Create a window variable for showIf if it doesn't already exist
+window.showIf = window.showIf || {};
+// Bounce element after showing
+window.showIf.beforeShow = function(target){
+  bounce(target);
+}</pre>
+
+    </div>
+
+    <hr />
+
+    <div class="container">
       <h2>ES6 Modules</h2>
     </div>
 
@@ -631,9 +670,24 @@ var animateContent = function(){
           s.setAttribute('src', '//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js');
           s.addEventListener('load', function(){
             alert("jQuery loaded.");
+            bindJQueryEvents();
           });
           document.body.appendChild(s);
         }
+      }
+    </script>
+
+    <script>
+      var $elements = document.querySelectorAll("[data-show-if]");
+      for($element of $elements) {
+        $element.addEventListener("show-if:before-show", function(event){
+          console.log("regular custom event", event.detail.showTarget);
+        });
+      }
+      var bindJQueryEvents = function(){
+        $("[data-show-if]").on("show-if:before-show", function(event, $target) {
+          console.log("jQuery event", $target);
+        });
       }
     </script>
   </body>
