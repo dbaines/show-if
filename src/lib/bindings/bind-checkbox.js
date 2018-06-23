@@ -16,9 +16,9 @@ const bindCheckbox = function($input, $allControls, $target) {
     // Check if there are multiple controls determining the
     // visibility of the element
     if($allControls.length > 1) {
-      discernMultipleRadio($target, $allControls, instant, toggle);
+      discernMultipleRadio($allControls, $target, instant, toggle);
     } else {
-      discernRadio($target, $input, instant, toggle);
+      discernRadio($input, $target, instant, toggle);
     }
   }
 

@@ -37,9 +37,6 @@ import exposeHelpers from './lib/expose-helpers';
   // Initialise if running in the browser
   if(typeof(window) !== "undefined") {
     window.addEventListener("DOMContentLoaded", showIf.init);
-    window.addEventListener("DOMCOntentLoaded", function(){
-      debugger;
-    });
   }
 
   return showIf;

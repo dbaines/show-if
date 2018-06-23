@@ -9,7 +9,12 @@ const defaultPlugins = [
   resolve(),
   json(),
   babel({
-    exclude: 'node_modules/**' // only transpile our source code
+     // only transpile our source code
+    exclude: 'node_modules/**',
+    // External helpers required for rollup babel transpiling
+    // Placed here rather than in .babelrc so that jest doesn't
+    // include it when running tests.
+    plugins: ["external-helpers"]
   })
 ]
 

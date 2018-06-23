@@ -212,19 +212,20 @@
     return shouldShow;
   };
 
-  var discernRadio = function discernRadio($target, $input) {
+  var discernRadio = function discernRadio($input) {
+    var $target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     var shouldShow = $input.checked === true;
-    if (callback) {
+    if (callback && $target) {
       callback($target, shouldShow, instant);
     } else {
       return shouldShow;
     }
   };
 
-  var discernMultipleRadio = function discernMultipleRadio($target, $inputs) {
+  var discernMultipleRadio = function discernMultipleRadio($inputs, $target) {
     var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
@@ -637,9 +638,9 @@
       // Check if there are multiple controls determining the
       // visibility of the element
       if ($allControls.length > 1) {
-        discernMultipleRadio($target, $allControls, instant, toggle);
+        discernMultipleRadio($allControls, $target, instant, toggle);
       } else {
-        discernRadio($target, $input, instant, toggle);
+        discernRadio($input, $target, instant, toggle);
       }
     };
 
@@ -949,9 +950,6 @@
     // Initialise if running in the browser
     if (typeof window !== "undefined") {
       window.addEventListener("DOMContentLoaded", showIf.init);
-      window.addEventListener("DOMCOntentLoaded", function () {
-        debugger;
-      });
     }
 
     return showIf;
