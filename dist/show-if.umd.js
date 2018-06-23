@@ -80,8 +80,10 @@
     slideSpeed: 200,
 
     // Expose helper functions to the window object
-    helpers: true,
+    helpers: false,
 
+    // Prefix for custom events
+    // eg: element.addEventListener("<eventPrefix>:before-show", ...);
     eventPrefix: 'show-if'
 
     // Build out settings from the defaults and then
@@ -89,8 +91,8 @@
     // present
   };var buildSettings = function buildSettings() {
     var settings = _extends({}, defaults$1);
-    if (window.showIfSettings) {
-      settings = _extends({}, defaults$1, window.showIfSettings);
+    if (window.showIf) {
+      settings = _extends({}, defaults$1, window.showIf);
     }
     return settings;
   };
@@ -103,6 +105,53 @@
   function getAttribute ($element, attribute) {
     return $element.hasAttribute(attribute) && $element.getAttribute(attribute);
   }
+
+  // Get the show value for this element
+  // can either be set in data-show-if or data-required-if
+  var getShowRuleForTarget = function getShowRuleForTarget($element) {
+    var ruleTypes = ["showIf", "requiredIf"];
+    var rule = "";
+    ruleTypes.filter(function (type) {
+      var attribute = settings[type];
+      var value = getAttribute($element, attribute);
+      if (value) {
+        rule = value;
+        return;
+      }
+    });
+    return rule;
+  };
+
+  // Get the dom nodes for a target rule
+  var getControlId = function getControlId(id) {
+    if (settings.getControlId) {
+      return settings.getControlId(id);
+    } else {
+      return document.getElementById(id);
+    }
+  };
+
+  // Get the controls for a show rule, eg:
+  // [data-show-if='foobar'] => #foobar
+  // [data-show-if='foo_&_bar'] => #foo,#bar
+  var getTargetControlsFor = function getTargetControlsFor($target) {
+    var $controls = [];
+    var showRules = getShowRuleForTarget($target);
+    // Create an array of required targets
+    // split by the control seperator
+    if (showRules) {
+      var controlLabels = [showRules];
+      if (showRules.indexOf(settings.controlSeperator) > -1) {
+        controlLabels = showRules.split(settings.controlSeperator);
+      }
+      controlLabels.map(function (label) {
+        $controls.push(getControlId(label));
+      });
+    } else {
+      console.warn("[SHOWJS] No controls found for element - does it contain a show target attribute such as `data-show-if`?");
+    }
+    return $controls;
+  };
 
   // Quick check to see if an element is an input type
   var isInput = function isInput($element) {
@@ -117,6 +166,115 @@
       return type === "checkbox" || type === "radio";
     } else {
       return false;
+    }
+  };
+
+  var discernMultipleFields = function discernMultipleFields($target, $inputs) {
+    var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+    var numberOfTargets = $inputs.length;
+    var shouldShow = false;
+    var numberOfTargetsHit = 0;
+
+    // Check if there are multiple values passed in eg:
+    // value1_&_value2
+    var multipleValues = (value + "").indexOf(settings.controlSeperator) > -1;
+    if (multipleValues) {
+      value = value.split(settings.controlSeperator);
+    }
+
+    // Loop through all controls
+    $inputs.map(function ($input, index) {
+      var valueToCheck = value;
+      var useProp = isInputCheckable($input);
+      if (multipleValues) {
+        valueToCheck = value[index] || true;
+      }
+      if (useProp) {
+        if ($input.checked === valueToCheck) {
+          numberOfTargetsHit++;
+        } else if ($input.value === valueToCheck) {
+          numberOfTargetsHit++;
+        }
+      }
+    });
+
+    // Match any or all?
+    if (getAttribute($target, settings.showType) === "any") {
+      // If match any, check that there's at least one hit
+      shouldShow = numberOfTargetsHit > 0;
+    } else {
+      // If match all, check if the number of targets hit matches the
+      // number of targets
+      shouldShow = numberOfTargetsHit === numberOfTargets;
+    }
+
+    return shouldShow;
+  };
+
+  var discernRadio = function discernRadio($target, $input) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var shouldShow = $input.checked === true;
+    if (callback) {
+      callback($target, shouldShow, instant);
+    } else {
+      return shouldShow;
+    }
+  };
+
+  var discernMultipleRadio = function discernMultipleRadio($target, $inputs) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var shouldShow = discernMultipleFields($target, $inputs);
+    if (callback) {
+      callback($target, shouldShow, instant);
+    } else {
+      return shouldShow;
+    }
+  };
+
+  var customEvent = function customEvent(eventName, $element) {
+    var eventFullName = settings.eventPrefix + ":" + eventName;
+    if (typeof jQuery !== "undefined") {
+      $($element).trigger(eventFullName, [$element]);
+    } else {
+      var event = new CustomEvent(eventFullName, {
+        detail: {
+          showTarget: $element
+        }
+      });
+      $element.dispatchEvent(event);
+    }
+  };
+
+  var beforeShow = function beforeShow($element) {
+    customEvent("before-show", $element);
+    if (settings.beforeShow) {
+      settings.beforeShow($element);
+    }
+  };
+
+  var afterShow = function afterShow($element) {
+    customEvent("after-show", $element);
+    if (settings.afterShow) {
+      settings.afterShow($element);
+    }
+  };
+
+  var beforeHide = function beforeHide($element) {
+    customEvent("before-hide", $element);
+    if (settings.beforeHide) {
+      settings.beforeHide($element);
+    }
+  };
+
+  var afterHide = function afterHide($element) {
+    customEvent("after-hide", $element);
+    if (settings.afterHide) {
+      settings.afterHide($element);
     }
   };
 
@@ -192,41 +350,6 @@
     }
   };
 
-  var targetShouldFocusIn = function targetShouldFocusIn($target) {
-    return $target.hasAttribute(settings.focusIn);
-  };
-
-  var focusInTarget = function focusInTarget($target) {
-    var focusTarget = getAttribute($target, settings.focusIn) || settings.inputTypes;
-    var $inputs = $target.querySelectorAll(focusTarget);
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-      for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var $input = _step.value;
-
-        if ($input.offsetWidth > 0 && $input.offsetHeight > 0) {
-          $input.focus();
-        }
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
-    }
-  };
-
   var targetShouldDisable = function targetShouldDisable($target) {
     return $target.hasAttribute(settings.disable);
   };
@@ -293,277 +416,38 @@
     }
   };
 
-  var targetShouldDestroy = function targetShouldDestroy($target) {
-    return $target.hasAttribute(settings.destroy);
+  var targetShouldFocusIn = function targetShouldFocusIn($target) {
+    return $target.hasAttribute(settings.focusIn);
   };
 
-  // Find an element and destroy all data in any form fields inside
-  // said element
-  var destroyDataIn = function destroyDataIn($element) {
-    if ($element.hasAttribute(settings.destroy)) {
-      var $inputs = $element.querySelectorAll(settings.inputTypes);
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+  var focusInTarget = function focusInTarget($target) {
+    var focusTarget = getAttribute($target, settings.focusIn) || settings.inputTypes;
+    var $inputs = $target.querySelectorAll(focusTarget);
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
 
+    try {
+      for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var $input = _step.value;
+
+        if ($input.offsetWidth > 0 && $input.offsetHeight > 0) {
+          $input.focus();
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
       try {
-        for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var $input = _step.value;
-
-          if (isInputCheckable($input)) {
-            $input.checked = false;
-          } else {
-            $input.value = "";
-          }
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
         }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
       } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
+        if (_didIteratorError) {
+          throw _iteratorError;
         }
       }
-    }
-  };
-
-  // Get the show value for this element
-  // can either be set in data-show-if or data-required-if
-  var getShowRuleForTarget = function getShowRuleForTarget($element) {
-    var ruleTypes = ["showIf", "requiredIf"];
-    var rule = "";
-    ruleTypes.filter(function (type) {
-      var attribute = settings[type];
-      var value = getAttribute($element, attribute);
-      if (value) {
-        rule = value;
-        return;
-      }
-    });
-    return rule;
-  };
-
-  // Get the dom nodes for a target rule
-  var getControlId = function getControlId(id) {
-    if (settings.getControlId) {
-      return settings.getControlId(id);
-    } else {
-      return document.getElementById(id);
-    }
-  };
-
-  // Get the controls for a show rule, eg:
-  // [data-show-if='foobar'] => #foobar
-  // [data-show-if='foo_&_bar'] => #foo,#bar
-  var getTargetControlsFor = function getTargetControlsFor($target) {
-    var $controls = [];
-    var showRules = getShowRuleForTarget($target);
-    // Create an array of required targets
-    // split by the control seperator
-    if (showRules) {
-      var controlLabels = [showRules];
-      if (showRules.indexOf(settings.controlSeperator) > -1) {
-        controlLabels = showRules.split(settings.controlSeperator);
-      }
-      controlLabels.map(function (label) {
-        $controls.push(getControlId(label));
-      });
-    } else {
-      console.warn("[SHOWJS] No controls found for element - does it contain a show target attribute such as `data-show-if`?");
-    }
-    return $controls;
-  };
-
-  // Check a value against an array of values or a single value
-  // eg:
-  // "test", ["foo", bar"] = false
-  // "test", "foobar" = false
-  // "test", ["foo", "bar", "test"] = true
-  // "test", "test" = true
-  var checkValue = function checkValue(currentValue, requiredValue) {
-    if (requiredValue.indexOf(settings.controlSeperator) > -1) {
-      requiredValue = requiredValue.split(settings.controlSeperator);
-      return requiredValue.indexOf(currentValue) > -1;
-    } else {
-      return currentValue === requiredValue;
-    }
-  };
-
-  var discernMultipleFields = function discernMultipleFields($target, $inputs) {
-    var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-    var numberOfTargets = $inputs.length;
-    var shouldShow = false;
-    var numberOfTargetsHit = 0;
-
-    // Check if there are multiple values passed in eg:
-    // value1_&_value2
-    var multipleValues = (value + "").indexOf(settings.controlSeperator) > -1;
-    if (multipleValues) {
-      value = value.split(settings.controlSeperator);
-    }
-
-    // Loop through all controls
-    $inputs.map(function ($input, index) {
-      var valueToCheck = value;
-      var useProp = isInputCheckable($input);
-      if (multipleValues) {
-        valueToCheck = value[index] || true;
-      }
-      if (useProp) {
-        if ($input.checked === valueToCheck) {
-          numberOfTargetsHit++;
-        } else if ($input.value === valueToCheck) {
-          numberOfTargetsHit++;
-        }
-      }
-    });
-
-    // Match any or all?
-    if (getAttribute($target, settings.showType) === "any") {
-      // If match any, check that there's at least one hit
-      shouldShow = numberOfTargetsHit > 0;
-    } else {
-      // If match all, check if the number of targets hit matches the
-      // number of targets
-      shouldShow = numberOfTargetsHit === numberOfTargets;
-    }
-
-    return shouldShow;
-  };
-
-  var discernSelect = function discernSelect($target, $select) {
-    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-    var selectOption = getAttribute($target, settings.showIfSelectOption);
-    if (selectOption) {
-      var shouldShow = checkValue($select.value, selectOption);
-      if (callback) {
-        callback($target, shouldShow, instant);
-      } else {
-        return shouldShow;
-      }
-    } else {
-      console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
-    }
-  };
-
-  var discernMultipleSelect = function discernMultipleSelect($target, $inputs) {
-    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var callback = arguments[3];
-
-    var selectOption = getAttribute($target, settings.showIfSelectOption);
-    if (selectOption) {
-      var shouldShow = discernMultipleFields($target, $inputs, selectOption);
-      if (callback) {
-        callback($target, shouldShow, instant);
-      } else {
-        return shouldShow;
-      }
-    } else {
-      console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
-    }
-  };
-
-  var discernRadio = function discernRadio($target, $input) {
-    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-    var shouldShow = $input.checked === true;
-    if (callback) {
-      callback($target, shouldShow, instant);
-    } else {
-      return shouldShow;
-    }
-  };
-
-  var discernMultipleRadio = function discernMultipleRadio($target, $inputs) {
-    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-    var shouldShow = discernMultipleFields($target, $inputs);
-    if (callback) {
-      callback($target, shouldShow, instant);
-    } else {
-      return shouldShow;
-    }
-  };
-
-  var discernInput = function discernInput($target, $input) {
-    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-    var shouldShow = false;
-    var valueToMatch = getAttribute($target, settings.showIfInputValue).toLowerCase();
-    var valueLower = $input.value.toLowerCase();
-    var showType = getAttribute($target, settings.showType);
-
-    // value to match is required if type isn't set to *
-    if (showType !== "*" && !valueToMatch) {
-      console.warn("[SHOWJS] Missing value to match on input field");
-    }
-
-    // Return true if there is anything in the input field
-    if (showType === "*") {
-      shouldShow = valueLower.length > 0;
-    } else if (showType === "any") {
-      shouldShow = valueLower.indexOf(valueToMatch) > -1;
-    } else {
-      shouldShow = checkValue(valueLower, valueToMatch);
-    }
-    if (callback) {
-      callback($target, shouldShow, instant);
-    } else {
-      return shouldShow;
-    }
-  };
-
-  var customEvent = function customEvent(eventName, $element) {
-    var eventFullName = settings.eventPrefix + ":" + eventName;
-    if (typeof jQuery !== "undefined") {
-      $($element).trigger(eventFullName, [$element]);
-    } else {
-      var event = new CustomEvent(eventFullName, {
-        detail: {
-          showTarget: $element
-        }
-      });
-      $element.dispatchEvent(event);
-    }
-  };
-
-  var beforeShow = function beforeShow($element) {
-    customEvent("before-show", $element);
-    if (settings.beforeShow) {
-      settings.beforeShow($element);
-    }
-  };
-
-  var afterShow = function afterShow($element) {
-    customEvent("after-show", $element);
-    if (settings.afterShow) {
-      settings.afterShow($element);
-    }
-  };
-
-  var beforeHide = function beforeHide($element) {
-    customEvent("before-hide", $element);
-    if (settings.beforeHide) {
-      settings.beforeHide($element);
-    }
-  };
-
-  var afterHide = function afterHide($element) {
-    customEvent("after-hide", $element);
-    if (settings.afterHide) {
-      settings.afterHide($element);
     }
   };
 
@@ -621,6 +505,46 @@
     }
 
     afterShow($target);
+  };
+
+  var targetShouldDestroy = function targetShouldDestroy($target) {
+    return $target.hasAttribute(settings.destroy);
+  };
+
+  // Find an element and destroy all data in any form fields inside
+  // said element
+  var destroyDataIn = function destroyDataIn($element) {
+    if ($element.hasAttribute(settings.destroy)) {
+      var $inputs = $element.querySelectorAll(settings.inputTypes);
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = $inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var $input = _step.value;
+
+          if (isInputCheckable($input)) {
+            $input.checked = false;
+          } else {
+            $input.value = "";
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
   };
 
   // The function used for hiding an element
@@ -697,6 +621,301 @@
     }
   };
 
+  var bindCheckbox = function bindCheckbox($input, $allControls, $target) {
+    // Get the name of the input element and check if there
+    // are other inputs with the same name (eg. collections, radio, 
+    // checkboxes)
+    var inputName = getAttribute($input, "name");
+    var $siblingTargets = [];
+    if (inputName) {
+      $siblingTargets = document.querySelectorAll("[name='" + inputName + "']");
+    }
+
+    var changeFunction = function changeFunction(event) {
+      var instant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      // Check if there are multiple controls determining the
+      // visibility of the element
+      if ($allControls.length > 1) {
+        discernMultipleRadio($target, $allControls, instant, toggle);
+      } else {
+        discernRadio($target, $input, instant, toggle);
+      }
+    };
+
+    // Check on change events
+    if ($siblingTargets.length) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = $siblingTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var $sibling = _step.value;
+
+          $sibling.addEventListener("change", changeFunction);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    } else {
+      $input.addEventListener("change", changeFunction);
+    }
+
+    // Check on page load
+    changeFunction(false, true);
+  };
+
+  // Check a value against an array of values or a single value
+  // eg:
+  // "test", ["foo", bar"] = false
+  // "test", "foobar" = false
+  // "test", ["foo", "bar", "test"] = true
+  // "test", "test" = true
+  var checkValue = function checkValue(currentValue, requiredValue) {
+    if (requiredValue.indexOf(settings.controlSeperator) > -1) {
+      requiredValue = requiredValue.split(settings.controlSeperator);
+      return requiredValue.indexOf(currentValue) > -1;
+    } else {
+      return currentValue === requiredValue;
+    }
+  };
+
+  var discernInput = function discernInput($target, $input) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var shouldShow = false;
+    var valueToMatch = getAttribute($target, settings.showIfInputValue).toLowerCase();
+    var valueLower = $input.value.toLowerCase();
+    var showType = getAttribute($target, settings.showType);
+
+    // value to match is required if type isn't set to *
+    if (showType !== "*" && !valueToMatch) {
+      console.warn("[SHOWJS] Missing value to match on input field");
+    }
+
+    // Return true if there is anything in the input field
+    if (showType === "*") {
+      shouldShow = valueLower.length > 0;
+    } else if (showType === "any") {
+      shouldShow = valueLower.indexOf(valueToMatch) > -1;
+    } else {
+      shouldShow = checkValue(valueLower, valueToMatch);
+    }
+    if (callback) {
+      callback($target, shouldShow, instant);
+    } else {
+      return shouldShow;
+    }
+  };
+
+  var bindInput = function bindInput($input, $allControls, $target) {
+    var changeFunction = function changeFunction(event) {
+      var instant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      discernInput($target, $input, instant, toggle);
+    };
+    // Check on keyup
+    $input.removeEventListener("keyup", changeFunction);
+    $input.addEventListener("keyup", changeFunction);
+
+    // Check on page load
+    changeFunction(false, true);
+  };
+
+  var discernSelect = function discernSelect($target, $select) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var selectOption = getAttribute($target, settings.showIfSelectOption);
+    if (selectOption) {
+      var shouldShow = checkValue($select.value, selectOption);
+      if (callback) {
+        callback($target, shouldShow, instant);
+      } else {
+        return shouldShow;
+      }
+    } else {
+      console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
+    }
+  };
+
+  var discernMultipleSelect = function discernMultipleSelect($target, $inputs) {
+    var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments[3];
+
+    var selectOption = getAttribute($target, settings.showIfSelectOption);
+    if (selectOption) {
+      var shouldShow = discernMultipleFields($target, $inputs, selectOption);
+      if (callback) {
+        callback($target, shouldShow, instant);
+      } else {
+        return shouldShow;
+      }
+    } else {
+      console.warn("[SHOWJS] Attempting to determine select logic with no `data-show-option` attribute present.");
+    }
+  };
+
+  var bindSelect = function bindSelect($select, $allControls, $target) {
+    var changeFunction = function changeFunction(event) {
+      var instant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if ($allControls.length > 1) {
+        discernMultipleSelect($target, $allControls, instant, toggle);
+      } else {
+        discernSelect($target, $select, instant, toggle);
+      }
+    };
+
+    // Check on change
+    $select.addEventListener("change", changeFunction);
+
+    // Check on page load
+    changeFunction(false, true);
+  };
+
+  var $targets = document.querySelectorAll("[" + settings.showIf + "]," + "[" + settings.requiredIf + "]");
+
+  // Get all the elements that need to show or hide in showIf.$listeners
+  // Then get the controls that determine their visibility
+  // Then set the visibility based on those controls' state
+  var bindListeners = function bindListeners() {
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = $targets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var $target = _step.value;
+
+        // Get the input controls for this target
+        var $allControls = getTargetControlsFor($target);
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = $allControls[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var $thisControl = _step2.value;
+
+            // Determine which sort of input control this is
+            var type = getAttribute($thisControl, "type");
+            var isTextInput = getAttribute($target, settings.showIfInput);
+            var isCheckboxOrRadio = type === "radio" || type === "checkbox";
+            var isSelect = getAttribute($target, settings.showIfSelectOption);
+
+            // Bind the appopriate listeners to this controls
+            if (isCheckboxOrRadio) {
+              bindCheckbox($thisControl, $allControls, $target);
+            } else if (isTextInput) {
+              bindInput($thisControl, $allControls, $target);
+            } else if (isSelect) {
+              bindSelect($thisControl, $allControls, $target);
+            }
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+  };
+
+  // Expose helpers to the window for more advanced usage
+  // This can be triggered simply by creating a window object:
+  // window.showIf = {
+  //   helpers: true
+  // }
+  var exposeHelpers = function exposeHelpers() {
+    var showIf = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+
+    // Don't do anything if helpers setting is disabled
+    if (!showIf.settings || !showIf.settings.helpers) {
+      return;
+    }
+
+    // Build out a combination object of the current
+    // window settings and the showIf object that's 
+    // passed in to this function
+    showIf = _extends({}, showIf, {
+      getAttribute: getAttribute,
+      isInput: isInput,
+      isInputCheckable: isInputCheckable,
+      targetIsRequiredIf: targetIsRequiredIf,
+      setRequired: setRequired,
+      targetShouldFocusIn: targetShouldFocusIn,
+      focusInTarget: focusInTarget,
+      targetShouldDisable: targetShouldDisable,
+      disableFieldsIn: disableFieldsIn,
+      enableFieldsIn: enableFieldsIn,
+      targetShouldDestroy: targetShouldDestroy, destroyDataIn: destroyDataIn,
+      getShowRuleForTarget: getShowRuleForTarget,
+      getControlId: getControlId,
+      getTargetControlsFor: getTargetControlsFor,
+      checkValue: checkValue,
+      discernMultipleFields: discernMultipleFields,
+      discernSelect: discernSelect,
+      discernMultipleSelect: discernMultipleSelect,
+      discernRadio: discernRadio,
+      discernMultipleRadio: discernMultipleRadio,
+      discernInput: discernInput,
+      toggle: toggle,
+      show: show,
+      hide: hide,
+      showFunction: showFunction,
+      hideFunction: hideFunction,
+      beforeShow: beforeShow,
+      afterShow: afterShow,
+      beforeHide: beforeHide,
+      afterHide: afterHide,
+      bindCheckbox: bindCheckbox,
+      bindInput: bindInput,
+      bindSelect: bindSelect,
+      bindAll: bindListeners
+    }, window.showIf);
+
+    // Expose helpers to window, replacing the current
+    // window object
+    window.showIf = showIf;
+  };
+
   /*!
    * ShowIf is used to show/hide elements based 
    * on form selections using simple HTML data-attribute
@@ -711,213 +930,27 @@
 
     var showIf = {
       version: version,
-      settings: settings,
-
-      _targetIsRequiredIf: targetIsRequiredIf,
-      _targetShouldDisable: targetShouldDisable,
-      _targetShouldDestroy: targetShouldDestroy,
-      _targetShouldFocusIn: targetShouldFocusIn,
-      _isInput: isInput,
-      _isInputCheckable: isInputCheckable,
-      _disableFieldsIn: disableFieldsIn,
-      _enableFieldsIn: enableFieldsIn,
-      _destroyDataIn: destroyDataIn,
-      _focusInTarget: focusInTarget,
-      _getTargetControlsFor: getTargetControlsFor,
-      _getShowRuleForElement: getShowRuleForTarget,
-      _getControlId: getControlId,
-      _checkValue: checkValue,
-      setRequired: setRequired,
-
-      _decernMultipleFields: discernMultipleFields,
-      decernSelect: discernSelect,
-      decernRadio: discernRadio,
-      decernMultipleRadio: discernMultipleRadio,
-      decernMultipleSelect: discernMultipleSelect,
-      decernInput: discernInput,
-
-      toggle: toggle
+      settings: settings
 
       // =========================================================================
       // Bind event listeners to inputs and show/hide on page load
       // =========================================================================
 
-    };showIf._bindCheckbox = function ($input, $allControls, $target) {
-      // Get the name of the input element and check if there
-      // are other inputs with the same name (eg. collections, radio, 
-      // checkboxes)
-      var inputName = getAttribute($input, "name");
-      var $siblingTargets = [];
-      if (inputName) {
-        $siblingTargets = document.querySelectorAll("[name='" + inputName + "']");
-      }
+      // =========================================================================
+      // Initialise
+      // =========================================================================
 
-      var changeFunction = function changeFunction(event) {
-        var instant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-        // Check if there are multiple controls determining the
-        // visibility of the element
-        if ($allControls.length > 1) {
-          showIf.decernMultipleRadio($target, $allControls, instant, showIf.toggle);
-        } else {
-          showIf.decernRadio($target, $input, instant, showIf.toggle);
-        }
-      };
-
-      // Check on change events
-      if ($siblingTargets.length) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = $siblingTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var $sibling = _step.value;
-
-            $sibling.addEventListener("change", changeFunction);
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-      } else {
-        $input.addEventListener("change", changeFunction);
-      }
-
-      // Check on page load
-      changeFunction(false, true);
-    };
-
-    showIf._bindInput = function ($input, $allControls, $target) {
-      var changeFunction = function changeFunction(event) {
-        var instant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-        showIf.decernInput($target, $input, instant, showIf.toggle);
-      };
-      // Check on keyup
-      $input.removeEventListener("keyup", changeFunction);
-      $input.addEventListener("keyup", changeFunction);
-
-      // Check on page load
-      changeFunction(false, true);
-    };
-
-    showIf._bindSelect = function ($select, $allControls, $target) {
-      var changeFunction = function changeFunction(event) {
-        var instant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-        if ($allControls.length > 1) {
-          showIf.decernMultipleSelect($target, $allControls, instant, showIf.toggle);
-        } else {
-          showIf.decernSelect($target, $select, instant, showIf.toggle);
-        }
-      };
-
-      // Check on change
-      $select.addEventListener("change", changeFunction);
-
-      // Check on page load
-      changeFunction(false, true);
-    };
-
-    // Get all the elements that need to show or hide in showIf.$listeners
-    // Then get the controls that determine their visibility
-    // Then set the visibility based on those controls' state
-    showIf.bindListeners = function () {
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = showIf.$targets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var $target = _step2.value;
-
-          // Get the input controls for this target
-          var $allControls = showIf._getTargetControlsFor($target);
-          var _iteratorNormalCompletion3 = true;
-          var _didIteratorError3 = false;
-          var _iteratorError3 = undefined;
-
-          try {
-            for (var _iterator3 = $allControls[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-              var $thisControl = _step3.value;
-
-              // Determine which sort of input control this is
-              var type = getAttribute($thisControl, "type");
-              var isTextInput = getAttribute($target, showIf.settings.showIfInput);
-              var isCheckboxOrRadio = type === "radio" || type === "checkbox";
-              var isSelect = getAttribute($target, showIf.settings.showIfSelectOption);
-
-              // Bind the appopriate listeners to this controls
-              if (isCheckboxOrRadio) {
-                showIf._bindCheckbox($thisControl, $allControls, $target);
-              } else if (isTextInput) {
-                showIf._bindInput($thisControl, $allControls, $target);
-              } else if (isSelect) {
-                showIf._bindSelect($thisControl, $allControls, $target);
-              }
-            }
-          } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                _iterator3.return();
-              }
-            } finally {
-              if (_didIteratorError3) {
-                throw _iteratorError3;
-              }
-            }
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-    };
-
-    // =========================================================================
-    // Initialise
-    // =========================================================================
-
-    showIf.init = function () {
+    };showIf.init = function () {
 
       // Expose helpers to the window for more advanced usage
       // This can be triggered simply by creating a window object:
       // window.showIf = {
       //   helpers: true
       // }
-      if (showIf.settings.helpers) {
-        window.showIf = showIf;
-      }
-
-      // Build list of target elements
-      showIf.$targets = document.querySelectorAll("[" + showIf.settings.showIf + "]," + "[" + showIf.settings.requiredIf + "]");
+      exposeHelpers(showIf);
 
       // Bind listeners to the target controls
-      showIf.bindListeners();
+      bindListeners();
     };
 
     // Initialise if running in the browser

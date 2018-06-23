@@ -660,8 +660,8 @@ window.showIf.beforeShow = function(target){
       <p><button class="button" onclick="jQueryify()">Click here</button> to load in jQuery. Then go back over the examples above to see the slide variation.</p>
     </div>
 
-    <script src="./../dist/show-if.umd.js"></script>
     <script>
+
       // jquerify.js
       // https://github.com/bgrins/devtools-snippets
       window.jQueryify = function(){
@@ -675,20 +675,30 @@ window.showIf.beforeShow = function(target){
           document.body.appendChild(s);
         }
       }
-    </script>
 
-    <script>
+      // Generic HTML5 CustomEvent Implementation
       var $elements = document.querySelectorAll("[data-show-if]");
       for($element of $elements) {
         $element.addEventListener("show-if:before-show", function(event){
-          console.log("regular custom event", event.detail.showTarget);
+          console.log("Before Show HTML5 event", event.detail.showTarget);
         });
       }
+
+      // jQuery event trigger implementation
       var bindJQueryEvents = function(){
         $("[data-show-if]").on("show-if:before-show", function(event, $target) {
-          console.log("jQuery event", $target);
+          console.log("Befrore Show jQuery Event", $target);
         });
       }
+
+      // Configuring showIf for the demo page
+      window.showIf = window.showIf || {};
+      showIf.helpers = true;
+      showIf.beforeShow = function(element){
+        console.log("Before Show Callback", element);
+      }
     </script>
+
+    <script src="./../dist/show-if.umd.js"></script>
   </body>
 </html>

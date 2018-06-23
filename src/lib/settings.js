@@ -58,8 +58,10 @@ const defaults = {
   slideSpeed: 200,
 
   // Expose helper functions to the window object
-  helpers: true,
+  helpers: false,
 
+  // Prefix for custom events
+  // eg: element.addEventListener("<eventPrefix>:before-show", ...);
   eventPrefix: 'show-if',
 
 }
@@ -69,10 +71,10 @@ const defaults = {
 // present
 const buildSettings = function(){
   let settings = { ...defaults };
-  if(window.showIfSettings) {
+  if(window.showIf) {
     settings = {
       ...defaults,
-      ...window.showIfSettings,
+      ...window.showIf,
     }
   }
   return settings;
