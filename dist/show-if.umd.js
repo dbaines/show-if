@@ -931,16 +931,9 @@
     var showIf = {
       version: version,
       settings: settings
+    };
 
-      // =========================================================================
-      // Bind event listeners to inputs and show/hide on page load
-      // =========================================================================
-
-      // =========================================================================
-      // Initialise
-      // =========================================================================
-
-    };showIf.init = function () {
+    showIf.init = function () {
 
       // Expose helpers to the window for more advanced usage
       // This can be triggered simply by creating a window object:
@@ -955,7 +948,10 @@
 
     // Initialise if running in the browser
     if (typeof window !== "undefined") {
-      showIf.init();
+      window.addEventListener("DOMContentLoaded", showIf.init);
+      window.addEventListener("DOMCOntentLoaded", function () {
+        debugger;
+      });
     }
 
     return showIf;

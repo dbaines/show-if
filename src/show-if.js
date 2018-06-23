@@ -3,7 +3,6 @@ import { settings } from './lib/settings';
 import bindAll from './lib/bindings/bind-all';
 import exposeHelpers from './lib/expose-helpers';
 
-
 /*!
  * ShowIf is used to show/hide elements based 
  * on form selections using simple HTML data-attribute
@@ -22,14 +21,6 @@ import exposeHelpers from './lib/expose-helpers';
     settings: settings,
   }
 
-  // =========================================================================
-  // Bind event listeners to inputs and show/hide on page load
-  // =========================================================================
-
-  // =========================================================================
-  // Initialise
-  // =========================================================================
-
   showIf.init = function(){
 
     // Expose helpers to the window for more advanced usage
@@ -45,7 +36,10 @@ import exposeHelpers from './lib/expose-helpers';
 
   // Initialise if running in the browser
   if(typeof(window) !== "undefined") {
-    showIf.init();
+    window.addEventListener("DOMContentLoaded", showIf.init);
+    window.addEventListener("DOMCOntentLoaded", function(){
+      debugger;
+    });
   }
 
   return showIf;

@@ -579,12 +579,38 @@
     <div class="container">
       <h2>Configuration</h2>
 
-      <p>All default configuration can be customised on your page by exposing a window variable <code>window.showIfSettings</code>:</p>
+      <p>All default configuration can be customised on your page by exposing a window variable <code>window.showIf</code>.</p>
 
-      <pre>window.showIfSettings = {
+      <pre>window.showIf = {
   showIf: 'data-show',
-  helpers: false,
 }</pre>
+
+      <p>You can expose a bunch of functions to the <code>window.showIf</code> object by adding <code>helpers: true</code> to your configuration:</p>
+
+      <pre>window.showIf = {
+  helpers: true,
+}</pre>
+
+      <p>You can now access a lot of functionality from that very same <code>window.showIf</code> object:</p>
+
+      <pre>//
+&lt;script>
+  window.showIf = window.showIf || {};
+  window.showIf.helpers = true;
+&lt;/script>
+&lt;script src="/assets/show-if.umd.min.js">&lt;/script>
+&lt;script>
+  var myCheckbox = document.getElementById("my-checkbox");
+  var myCustomDiscern = function(){
+    if(window.showIf.discernCheckbox(myCheckbox)) {
+      doSomething();
+    }
+  }
+  
+  myCheckbox.addEventListner("change", myCustomDiscern);
+  myInput.addEventListener("keyup", myCustomDiscern);
+&lt;/script></pre>
+
     </div>
 
     <hr />
@@ -660,6 +686,7 @@ window.showIf.beforeShow = function(target){
       <p><button class="button" onclick="jQueryify()">Click here</button> to load in jQuery. Then go back over the examples above to see the slide variation.</p>
     </div>
 
+    <script src="./../dist/show-if.umd.js"></script>
     <script>
 
       // jquerify.js
@@ -698,7 +725,5 @@ window.showIf.beforeShow = function(target){
         console.log("Before Show Callback", element);
       }
     </script>
-
-    <script src="./../dist/show-if.umd.js"></script>
   </body>
 </html>
