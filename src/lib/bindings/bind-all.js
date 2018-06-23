@@ -1,7 +1,7 @@
 import { settings } from './../settings';
 import getAttribute from './../get-attribute';
 import { getTargetControlsFor } from './../get-target-rules';
-import bindCheckbox from './bind-checkbox';
+import bindRadio from './bind-radio';
 import bindInput from './bind-input';
 import bindSelect from './bind-select';
 
@@ -26,7 +26,7 @@ const bindListeners = function(){
 
       // Bind the appopriate listeners to this controls
       if(isCheckboxOrRadio) {
-        bindCheckbox($thisControl, $allControls, $target);
+        bindRadio($thisControl, $allControls, $target);
       } else if(isTextInput) {
         bindInput($thisControl, $allControls, $target);
       } else if(isSelect) {

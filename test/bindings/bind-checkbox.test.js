@@ -1,5 +1,6 @@
+const { changeChecked } = require('./../test-helpers/change-input');
 const { settings } = require('./../../src/lib/settings');
-const bindCheckbox = require('./../../src/lib/bindings/bind-checkbox').default;
+const bindRadio = require('./../../src/lib/bindings/bind-radio').default;
 
 describe("Bindings", () => {
 
@@ -24,13 +25,13 @@ describe("Bindings", () => {
     test("Hidden when unchecked", () => {
       // Check that element is visible by default
       expect($target.style.display).toBe("");
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to now be hidden
       expect($target.style.display).toBe("none");
     });
   
     test("Visible when checked", () => {
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to be hidden by default
       expect($target.style.display).toBe("none");
       // Check input and update bindings for test
@@ -44,7 +45,7 @@ describe("Bindings", () => {
       // Expect input to be enabled
       expect($nestedInput.disabled).toBe(false);
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect input to be disabled
       expect($nestedInput.disabled).toBe(true);
       // Change input to checked
@@ -59,7 +60,7 @@ describe("Bindings", () => {
       // Expect value to be set
       expect($nestedInput.value).toBe("test data");
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect value to be removed
       expect($nestedInput.value).toBe("");
     });
@@ -68,7 +69,7 @@ describe("Bindings", () => {
       $target.setAttribute(settings.inverse, "");
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to still be visible after binding events
       expect($target.style.display).toBe("block");
       // Check input and expect that element is now hidden
@@ -81,7 +82,7 @@ describe("Bindings", () => {
       $input.checked = true;
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to still be hidden after binding events
       expect($target.style.display).toBe("none");
       // Uncheck input and expect that element is now visible
@@ -95,7 +96,7 @@ describe("Bindings", () => {
       // Expect input to be enabled
       expect($nestedInput.disabled).toBe(false);
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect input to be disabled
       expect($nestedInput.disabled).toBe(false);
       // Change input to checked
@@ -111,7 +112,7 @@ describe("Bindings", () => {
       // Expect value to be set
       expect($nestedInput.value).toBe("test data");
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect value to be removed
       expect($nestedInput.value).toBe("test data");
       changeChecked($input, true);
@@ -131,13 +132,13 @@ describe("Bindings", () => {
     test("Hidden when unchecked", () => {
       // Check that element is visible by default
       expect($target.style.display).toBe("");
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to now be hidden
       expect($target.style.display).toBe("none");
     });
   
     test("Visible when checked", () => {
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to be hidden by default
       expect($target.style.display).toBe("none");
       // Check input and update bindings for test
@@ -151,7 +152,7 @@ describe("Bindings", () => {
       // Expect input to be enabled
       expect($nestedInput.disabled).toBe(false);
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect input to be disabled
       expect($nestedInput.disabled).toBe(true);
       // Change input to checked
@@ -166,7 +167,7 @@ describe("Bindings", () => {
       // Expect value to be set
       expect($nestedInput.value).toBe("test data");
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect value to be removed
       expect($nestedInput.value).toBe("");
     });
@@ -175,7 +176,7 @@ describe("Bindings", () => {
       $target.setAttribute(settings.inverse, "");
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to still be visible after binding events
       expect($target.style.display).toBe("block");
       // Check input and expect that element is now hidden
@@ -188,7 +189,7 @@ describe("Bindings", () => {
       $input.checked = true;
       // Expect that element is visible by default
       expect($target.style.display).toBe("");
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect element to still be hidden after binding events
       expect($target.style.display).toBe("none");
       // Uncheck input and expect that element is now visible
@@ -202,7 +203,7 @@ describe("Bindings", () => {
       // Expect input to be enabled
       expect($nestedInput.disabled).toBe(false);
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect input to be disabled
       expect($nestedInput.disabled).toBe(false);
       // Change input to checked
@@ -218,7 +219,7 @@ describe("Bindings", () => {
       // Expect value to be set
       expect($nestedInput.value).toBe("test data");
       // Bind
-      bindCheckbox($input, false, $target);
+      bindRadio($input, false, $target);
       // Expect value to be removed
       expect($nestedInput.value).toBe("test data");
       changeChecked($input, true);

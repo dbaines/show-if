@@ -14,7 +14,7 @@ import { discernRadio, discernMultipleRadio } from './discerns/discern-radio';
 import { discernInput } from './discerns/discern-input';
 
 // Bindings
-import bindCheckbox from './bindings/bind-checkbox';
+import bindRadio from './bindings/bind-radio';
 import bindInput from './bindings/bind-input';
 import bindSelect from './bindings/bind-select';
 import bindAll from './bindings/bind-all';
@@ -72,7 +72,7 @@ const exposeHelpers = function(showIf={}) {
     afterShow,
     beforeHide,
     afterHide,
-    bindCheckbox,
+    bindRadio,
     bindInput,
     bindSelect,
     bindAll,

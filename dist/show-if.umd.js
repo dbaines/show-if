@@ -622,7 +622,7 @@
     }
   };
 
-  var bindCheckbox = function bindCheckbox($input, $allControls, $target) {
+  var bindRadio = function bindRadio($input, $allControls, $target) {
     // Get the name of the input element and check if there
     // are other inputs with the same name (eg. collections, radio, 
     // checkboxes)
@@ -820,7 +820,7 @@
 
             // Bind the appopriate listeners to this controls
             if (isCheckboxOrRadio) {
-              bindCheckbox($thisControl, $allControls, $target);
+              bindRadio($thisControl, $allControls, $target);
             } else if (isTextInput) {
               bindInput($thisControl, $allControls, $target);
             } else if (isSelect) {
@@ -906,7 +906,7 @@
       afterShow: afterShow,
       beforeHide: beforeHide,
       afterHide: afterHide,
-      bindCheckbox: bindCheckbox,
+      bindRadio: bindRadio,
       bindInput: bindInput,
       bindSelect: bindSelect,
       bindAll: bindListeners
