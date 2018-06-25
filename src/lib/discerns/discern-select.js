@@ -3,10 +3,19 @@ import checkValue from './discern-value';
 import getAttribute from './../get-attribute';
 import discernMultipleFields from './discern-multiple-fields';
 
+const shouldTargetRequireSelectLabel = function($target) {
+  return $target.hasAttribute(settings.showIfSelectUsesLabel);
+}
+
 const discernSelect = function($target, $select, instant=false, callback=false) {
-  let selectOption = getAttribute($target, settings.showIfSelectOption);
+  
+  const selectOption = getAttribute($target, settings.showIfSelectOption);
   if(selectOption) {
-    const shouldShow = checkValue($select.value, selectOption);
+    let valueToCheck = $select.value;
+    if(shouldTargetRequireSelectLabel($target)) {
+      valueToCheck = $select.options[$select.selectedIndex].innerHTML;
+    }
+    const shouldShow = checkValue(valueToCheck, selectOption);
     if(callback) {
       callback($target, shouldShow, instant);
     } else {

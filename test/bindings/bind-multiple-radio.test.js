@@ -246,6 +246,42 @@ describe("Bindings", () => {
         expect($target.style.display).toBe("none");
       });
 
+      test("Visible when option 2 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-2"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Visible when option 3 is selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-3"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Visible when option 1, 2 and 3 are selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"),true);
+        changeChecked($inputGroup.querySelector("#test-2"),true);
+        changeChecked($inputGroup.querySelector("#test-3"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Visible when all options are selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"),true);
+        changeChecked($inputGroup.querySelector("#test-2"),true);
+        changeChecked($inputGroup.querySelector("#test-3"),true);
+        changeChecked($inputGroup.querySelector("#test-4"),true);
+        expect($target.style.display).toBe("block");
+      });
+
+      test("Hidden when option 1 and 4 are selected", () => {
+        expect($target.style.display).toBe("none");
+        changeChecked($inputGroup.querySelector("#test-1"),true);
+        changeChecked($inputGroup.querySelector("#test-4"),true);
+        expect($target.style.display).toBe("none");
+      });
+
     });
 
   });

@@ -25,6 +25,9 @@ const defaults = {
   // the element
   showIfSelectOption: "data-show-option",
 
+  // Select element uses label rather than value
+  showIfSelectUsesLabel: "data-show-option-labels",
+
   // Input text to match
   showIfInputValue: "data-show-input",
 

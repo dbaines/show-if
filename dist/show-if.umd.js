@@ -47,6 +47,9 @@
     // the element
     showIfSelectOption: "data-show-option",
 
+    // Select element uses label rather than value
+    showIfSelectUsesLabel: "data-show-option-labels",
+
     // Input text to match
     showIfInputValue: "data-show-input",
 
@@ -684,9 +687,9 @@
 
   // Check a value against an array of values or a single value
   // eg:
-  // "test", ["foo", bar"] = false
+  // "test", "foo_&&_bar" = false
   // "test", "foobar" = false
-  // "test", ["foo", "bar", "test"] = true
+  // "test", "foo_&&_test_bar" = true
   // "test", "test" = true
   var checkValue = function checkValue(currentValue, requiredValue) {
     if (requiredValue.indexOf(settings.controlSeperator) > -1) {
@@ -740,13 +743,22 @@
     changeFunction(false, true);
   };
 
+  var shouldTargetRequireSelectLabel = function shouldTargetRequireSelectLabel($target) {
+    return $target.hasAttribute(settings.showIfSelectUsesLabel);
+  };
+
   var discernSelect = function discernSelect($target, $select) {
     var instant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
+
     var selectOption = getAttribute($target, settings.showIfSelectOption);
     if (selectOption) {
-      var shouldShow = checkValue($select.value, selectOption);
+      var valueToCheck = $select.value;
+      if (shouldTargetRequireSelectLabel($target)) {
+        valueToCheck = $select.options[$select.selectedIndex].innerHTML;
+      }
+      var shouldShow = checkValue(valueToCheck, selectOption);
       if (callback) {
         callback($target, shouldShow, instant);
       } else {

@@ -8,4 +8,9 @@ const changeChecked = function($input, value=false) {
   changeInput($input);
 }
 
-export { changeInput, changeChecked };
+const changeInputValue = function($input, value="") {
+  $input.value = value;
+  changeInput($input);
+}
+
+export { changeInput, changeChecked, changeInputValue };
